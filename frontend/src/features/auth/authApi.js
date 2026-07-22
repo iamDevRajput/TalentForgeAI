@@ -11,30 +11,7 @@
  * served from same origin in production via NGINX).
  */
 
-import axios from 'axios';
-import { useAuthStore } from './authStore';
-
-// ── Axios instance ───────────────────────────────────────────────────────────
-
-export const api = axios.create({
-  baseURL: '/api',
-  withCredentials: true,    // Include httpOnly cookies on every request
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
-});
-
-// ── Response interceptor: handle 401 globally ────────────────────────────────
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear local auth state and let ProtectedRoute redirect to login
-      useAuthStore.getState().clearUser();
-    }
-    return Promise.reject(error);
-  },
-);
+import api from '@/shared/api/axios';
 
 // ── Auth API functions ───────────────────────────────────────────────────────
 

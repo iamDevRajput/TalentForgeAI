@@ -1,5 +1,5 @@
-const Job = require('../../models/Job');
-const { AppError } = require('../../utils/AppError');
+import Job from '../../models/Job.js';
+import { AppError } from '../../utils/AppError.js';
 
 /**
  * Creates a new job.
@@ -8,7 +8,7 @@ const { AppError } = require('../../utils/AppError');
  * @param {string} callerId - ID of the creator
  * @returns {Object} Created job document
  */
-exports.createJob = async (data, callerRole, callerId) => {
+export const createJob = async (data, callerRole, callerId) => {
   // Service-layer RBAC: Only HR can create jobs
   if (callerRole !== 'hr') {
     throw new AppError('Only HR personnel can create jobs', 403);
@@ -30,7 +30,7 @@ exports.createJob = async (data, callerRole, callerId) => {
  * @param {string} callerRole - Role of the requesting user
  * @returns {Object} { jobs, total, page, limit }
  */
-exports.getJobs = async ({ page = 1, limit = 10 }, callerRole) => {
+export const getJobs = async ({ page = 1, limit = 10 }, callerRole) => {
   const pageNum = Math.max(1, parseInt(page, 10) || 1);
   // Cap max limit at 100 to prevent large data dumps
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
@@ -75,7 +75,7 @@ exports.getJobs = async ({ page = 1, limit = 10 }, callerRole) => {
  * @param {string} callerRole - Role of the requesting user
  * @returns {Object} Job document
  */
-exports.getJobById = async (jobId, callerRole) => {
+export const getJobById = async (jobId, callerRole) => {
   const job = await Job.findById(jobId).lean();
 
   if (!job) {
@@ -103,7 +103,7 @@ exports.getJobById = async (jobId, callerRole) => {
  * @param {string} callerRole - Role of the requesting user
  * @returns {Object} Updated job document
  */
-exports.updateJobStatus = async (jobId, newStatus, callerRole) => {
+export const updateJobStatus = async (jobId, newStatus, callerRole) => {
   if (callerRole !== 'hr') {
     throw new AppError('Only HR personnel can update job statuses', 403);
   }
@@ -140,7 +140,7 @@ exports.updateJobStatus = async (jobId, newStatus, callerRole) => {
  * @param {string} callerRole - Role of the requesting user
  * @returns {Object} Updated job document
  */
-exports.updateJob = async (jobId, updates, callerRole) => {
+export const updateJob = async (jobId, updates, callerRole) => {
   if (callerRole !== 'hr') {
     throw new AppError('Only HR personnel can update jobs', 403);
   }

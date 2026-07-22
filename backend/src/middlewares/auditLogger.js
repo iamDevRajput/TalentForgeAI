@@ -19,7 +19,7 @@
  */
 
 import logger from '../config/logger.js';
-// import AuditLog from '../models/AuditLog.js'; // Uncomment in Phase 5
+import AuditLog from '../models/AuditLog.js';
 
 /**
  * Middleware factory. Wraps a state-changing route to record an audit entry.
@@ -35,7 +35,12 @@ export const withAudit = (action, entityType, getEntityId) => async (req, res, n
   res.json = async (body) => {
     // Only log on successful state-changing responses (2xx)
     if (res.statusCode >= 200 && res.statusCode < 300) {
-      const entityId = getEntityId ? getEntityId(req) : req.params.id;
+      let entityId = req.params.id;
+      if (getEntityId) {
+        entityId = getEntityId(req, body);
+      } else if (!entityId && body?.data?.job?._id) {
+        entityId = body.data.job._id;
+      }
 
       const auditEntry = {
         actorId: req.user?.id,
@@ -49,8 +54,9 @@ export const withAudit = (action, entityType, getEntityId) => async (req, res, n
         timestamp: new Date(),
       };
 
-      // PHASE 5: Replace logger.debug with AuditLog.create(auditEntry)
-      logger.debug(`[AUDIT STUB] ${JSON.stringify(auditEntry)}`);
+      // Log to DB for Phase 2+ (Jobs and beyond)
+      await AuditLog.create(auditEntry);
+      logger.debug(`[AUDIT CREATED] ${JSON.stringify(auditEntry)}`);
     }
 
     return originalJson(body);
