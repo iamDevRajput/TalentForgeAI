@@ -155,12 +155,14 @@ export const updateJob = async (jobId, updates, callerRole) => {
     throw new AppError('Cannot edit a closed job', 400);
   }
 
-  // Strip out status updates from this generic update method 
-  // (status must be updated via updateJobStatus)
-  delete updates.status;
-  delete updates.createdBy;
+  // Use allowlist pattern for forward-safety
+  const EDITABLE_FIELDS = ['title', 'department', 'description', 'requirements'];
+  for (const field of EDITABLE_FIELDS) {
+    if (updates[field] !== undefined) {
+      job[field] = updates[field];
+    }
+  }
 
-  Object.assign(job, updates);
   await job.save();
 
   return job;

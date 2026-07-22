@@ -255,5 +255,32 @@ describe('Job Management Module', () => {
 
       expect(res.status).toBe(400);
     });
+
+    it('should silently ignore attempts to overwrite status or createdBy via updateJob', async () => {
+      // Create and open a job as HR
+      await Job.findByIdAndUpdate(jobId, { status: 'open' });
+      
+      const newCreatorId = new mongoose.Types.ObjectId().toString();
+
+      // PATCH it with a body that includes status and createdBy alongside a legitimate field
+      const res = await request(app)
+        .patch(`/api/jobs/${jobId}`)
+        .set('Authorization', `Bearer ${hrToken}`)
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify({ 
+          title: 'Safe Title Update',
+          status: 'closed', // Should be ignored
+          createdBy: newCreatorId // Should be ignored
+        }));
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.job.title).toBe('Safe Title Update');
+
+      // Assert that job.status and job.createdBy in the DB are unchanged
+      const updatedJob = await Job.findById(jobId);
+      expect(updatedJob.title).toBe('Safe Title Update');
+      expect(updatedJob.status).toBe('open');
+      expect(updatedJob.createdBy.toString()).toBe(hrUser._id.toString());
+    });
   });
 });
