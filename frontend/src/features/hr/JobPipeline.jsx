@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Calendar } from 'lucide-react';
 import NavBar from '@/shared/components/NavBar';
 import Sidebar from '@/shared/components/Sidebar';
 import LoadingSpinner from '@/shared/components/LoadingSpinner';
+import ScheduleInterviewModal from './ScheduleInterviewModal';
 
 const STAGES = ['applied', 'screening', 'interviewing', 'offered', 'hired', 'rejected'];
 
@@ -13,6 +15,7 @@ export default function JobPipeline() {
   const [applications, setApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [schedulingApp, setSchedulingApp] = useState(null);
 
   useEffect(() => {
     fetchApplications();
@@ -158,6 +161,15 @@ export default function JobPipeline() {
                                           Applied {new Date(app.createdAt).toLocaleDateString()}
                                         </p>
                                       </div>
+                                      {(stage === 'screening' || stage === 'interviewing') && (
+                                        <button
+                                          onClick={() => setSchedulingApp(app)}
+                                          className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                                          title="Schedule Interview"
+                                        >
+                                          <Calendar className="size-4" />
+                                        </button>
+                                      )}
                                     </div>
                                   </div>
                                 )}
@@ -175,6 +187,17 @@ export default function JobPipeline() {
           )}
         </main>
       </div>
+
+      <ScheduleInterviewModal
+        isOpen={!!schedulingApp}
+        application={schedulingApp}
+        onClose={() => setSchedulingApp(null)}
+        onScheduled={(interview) => {
+          // If the application was successfully scheduled, its stage likely changed to 'interviewing'
+          // We refetch to keep timeline and status perfectly in sync with backend
+          fetchApplications();
+        }}
+      />
     </div>
   );
 }

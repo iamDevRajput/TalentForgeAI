@@ -1,20 +1,39 @@
-/**
- * InterviewerDashboard.jsx — Interviewer role dashboard shell
- *
- * RBAC note: Interviewers see ONLY their assigned candidates and interviews.
- * No pipeline visibility. This is enforced server-side — the UI reflects that.
- *
- * Phase 1: Shell with "what's coming" state.
- * Phase 8: AI question generation + interview list replace this shell.
- */
-
+import { useState, useEffect } from 'react';
+import { Video, Calendar, Clock, MessageSquare, CheckCircle, ExternalLink } from 'lucide-react';
 import NavBar from '@/shared/components/NavBar';
 import Sidebar from '@/shared/components/Sidebar';
-import { useAuthStore } from '@/features/auth/authStore';
-import { Calendar, MessageSquare, ShieldCheck } from 'lucide-react';
+import LoadingSpinner from '@/shared/components/LoadingSpinner';
+import SubmitFeedbackModal from './SubmitFeedbackModal';
 
 export default function InterviewerDashboard() {
-  const { user } = useAuthStore();
+  const [interviews, setInterviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const [selectedInterview, setSelectedInterview] = useState(null);
+
+  useEffect(() => {
+    fetchInterviews();
+  }, []);
+
+  const fetchInterviews = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/interviews/my');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.message || 'Failed to fetch interviews');
+      setInterviews(json.data.interviews);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFeedbackSubmitted = (updatedInterview) => {
+    setInterviews(prev => prev.map(inv => inv._id === updatedInterview._id ? updatedInterview : inv));
+    setSelectedInterview(null);
+  };
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
@@ -23,63 +42,108 @@ export default function InterviewerDashboard() {
         <Sidebar />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="mx-auto max-w-3xl space-y-8 page-enter">
-            {/* Welcome */}
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Interviewer Dashboard</p>
-              <h1 className="text-2xl font-bold text-foreground">
-                Hello, {user?.name?.split(' ')[0]} 👋
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Your focused workspace for conducting interviews and submitting feedback.
-              </p>
+          <div className="mx-auto max-w-5xl space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">My Interviews</h2>
+              <p className="text-sm text-muted-foreground">Manage your upcoming interviews and submit feedback.</p>
             </div>
 
-            {/* RBAC notice */}
-            <div className="glass-card flex items-start gap-4 rounded-2xl p-6">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15">
-                <ShieldCheck className="size-5 text-blue-400" />
+            {isLoading ? (
+              <div className="flex h-64 items-center justify-center">
+                <LoadingSpinner size="lg" />
               </div>
-              <div>
-                <h2 className="font-semibold text-foreground">Access scope: Assigned interviews only</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  You can only see candidates and interviews that have been assigned to you by
-                  the HR team. This is enforced at the server level — not just the UI.
+            ) : error ? (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                {error}
+              </div>
+            ) : interviews.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-muted/30">
+                <Calendar className="size-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-medium">No interviews</h3>
+                <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                  You don't have any upcoming interviews scheduled.
                 </p>
               </div>
-            </div>
+            ) : (
+              <div className="grid gap-4">
+                {interviews.map(interview => (
+                  <div key={interview._id} className="rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-lg text-foreground">
+                            {interview.applicationId?.candidateId?.name || 'Unknown Candidate'}
+                          </h3>
+                          <p className="text-sm font-medium text-primary/80">
+                            {interview.applicationId?.jobId?.title || 'Unknown Role'}
+                          </p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="size-4" />
+                            {new Date(interview.scheduledAt).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="size-4" />
+                            {new Date(interview.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({interview.durationMinutes} min)
+                          </div>
+                          {interview.meetingLink && (
+                            <a
+                              href={interview.meetingLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center gap-1.5 text-primary hover:underline"
+                            >
+                              <Video className="size-4" />
+                              Join Meeting
+                              <ExternalLink className="size-3 ml-0.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
 
-            {/* Phase previews */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="glass-card rounded-xl border border-blue-500/20 p-5">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-blue-500/10">
-                  <Calendar className="size-4 text-blue-400" />
-                </div>
-                <h3 className="mt-3 text-sm font-semibold text-foreground">My Interviews</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  View your scheduled interviews, see AI-suggested questions, and join calls.
-                </p>
-                <span className="mt-3 inline-flex rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-                  Phase 8
-                </span>
-              </div>
+                      <div className="flex flex-col items-start sm:items-end gap-2">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
+                          interview.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' :
+                          interview.status === 'scheduled' ? 'bg-blue-500/10 text-blue-500' :
+                          'bg-slate-500/10 text-slate-500'
+                        }`}>
+                          {interview.status}
+                        </span>
 
-              <div className="glass-card rounded-xl border border-purple-500/20 p-5">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-purple-500/10">
-                  <MessageSquare className="size-4 text-purple-400" />
-                </div>
-                <h3 className="mt-3 text-sm font-semibold text-foreground">Submit Feedback</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Structured feedback forms — ratings + notes — for each candidate you've interviewed.
-                </p>
-                <span className="mt-3 inline-flex rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-                  Phase 9
-                </span>
+                        {interview.status === 'scheduled' ? (
+                          <button
+                            onClick={() => setSelectedInterview(interview)}
+                            className="mt-2 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                          >
+                            <MessageSquare className="size-4" />
+                            Submit Feedback
+                          </button>
+                        ) : interview.status === 'completed' ? (
+                          <div className="mt-2 flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle className="size-4" />
+                            Feedback Submitted
+                          </div>
+                        ) : null}
+                      </div>
+
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
+
+      <SubmitFeedbackModal
+        isOpen={!!selectedInterview}
+        interview={selectedInterview}
+        onClose={() => setSelectedInterview(null)}
+        onSubmit={handleFeedbackSubmitted}
+      />
     </div>
   );
 }
