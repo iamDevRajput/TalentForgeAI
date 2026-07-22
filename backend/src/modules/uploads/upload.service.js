@@ -16,7 +16,7 @@ if (!env.CLOUDINARY_URL && env.NODE_ENV !== 'test') {
  * @param {string} originalName - Original filename
  * @returns {Promise<Object>} - The Cloudinary upload result
  */
-export const uploadResumeToCloudinary = (fileBuffer, originalName) => {
+export const uploadResumeToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {

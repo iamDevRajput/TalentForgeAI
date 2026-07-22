@@ -5,7 +5,7 @@ import {
   updateJobSchema,
   updateJobStatusSchema,
 } from './job.validator.js';
-import { AppError } from '../../utils/AppError.js';
+
 
 /**
  * @desc    Create a new job

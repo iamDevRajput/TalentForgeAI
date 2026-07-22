@@ -1,126 +1,216 @@
-/**
- * CandidateDashboard.jsx — Candidate role dashboard shell
- *
- * Candidates see a LINEAR status tracker (not kanban — they shouldn't see
- * internal pipeline-management complexity per the PRD UX spec).
- *
- * Phase 1: Welcome shell with account status.
- * Phase 3: Resume upload + parse confidence feedback replaces this shell.
- * Phase 5: Application status tracker becomes active here.
- */
-
+import { useState, useEffect } from 'react';
 import NavBar from '@/shared/components/NavBar';
 import { useAuthStore } from '@/features/auth/authStore';
-import { FileText, Send, CheckCircle2, Sparkles, Upload } from 'lucide-react';
-
-const TIMELINE_STEPS = [
-  { id: 1, label: 'Create Account', status: 'complete', icon: CheckCircle2 },
-  { id: 2, label: 'Upload Resume', status: 'upcoming', phase: 3, icon: Upload },
-  { id: 3, label: 'Apply to Jobs', status: 'upcoming', phase: 3, icon: Send },
-  { id: 4, label: 'Track Applications', status: 'upcoming', phase: 5, icon: FileText },
-];
+import { jobApi } from '@/features/jobs/jobApi';
+import { applicationApi } from '@/features/applications/applicationApi';
+import JobApplicationForm from '@/features/jobs/JobApplicationForm';
+import { Briefcase, Send, CheckCircle2, Clock } from 'lucide-react';
 
 export default function CandidateDashboard() {
   const { user } = useAuthStore();
+  const [activeTab, setActiveTab] = useState('available'); // 'available' or 'applications'
+  
+  const [jobs, setJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // Fetch both in parallel
+      const [jobsData, appsData] = await Promise.all([
+        jobApi.getJobs({ limit: 100 }),
+        applicationApi.getMyApplications()
+      ]);
+      setJobs(jobsData.jobs);
+      setApplications(appsData);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApplicationSuccess = (newApplication) => {
+    setApplications([newApplication, ...applications]);
+    setActiveTab('applications'); // switch tab to show the new application
+  };
+
+  const hasApplied = (jobId) => {
+    return applications.some(app => app.jobId === jobId || (app.jobId?._id === jobId));
+  };
+
+  const statusColors = {
+    applied: 'bg-blue-500/10 text-blue-500',
+    screening: 'bg-amber-500/10 text-amber-500',
+    interviewing: 'bg-purple-500/10 text-purple-500',
+    offered: 'bg-emerald-500/10 text-emerald-500',
+    hired: 'bg-emerald-500/10 text-emerald-500',
+    rejected: 'bg-red-500/10 text-red-500',
+  };
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background flex flex-col">
       <NavBar />
-
-      <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        <div className="space-y-8 page-enter">
-          {/* Welcome */}
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-foreground">
-              Welcome, {user?.name?.split(' ')[0]} 🎉
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Your candidate portal is ready. Here's what's coming.
-            </p>
-          </div>
-
-          {/* Account confirmed card */}
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-500/15">
-                <CheckCircle2 className="size-5 text-green-400" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-foreground">Account confirmed</h2>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Journey timeline */}
-          <div className="glass-card rounded-2xl p-6">
-            <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Your hiring journey
-            </h2>
-            <ol className="relative space-y-6 border-l border-border/50 pl-6">
-              {TIMELINE_STEPS.map((step) => (
-                <li key={step.id} className="relative">
-                  {/* Dot */}
-                  <div
-                    className={`absolute -left-[1.6rem] flex size-5 items-center justify-center rounded-full border-2 ${
-                      step.status === 'complete'
-                        ? 'border-green-500 bg-green-500/20'
-                        : 'border-border bg-background'
-                    }`}
-                  >
-                    {step.status === 'complete' && (
-                      <div className="size-2 rounded-full bg-green-500" />
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <step.icon
-                      className={`size-4 ${step.status === 'complete' ? 'text-green-400' : 'text-muted-foreground'}`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        step.status === 'complete' ? 'text-foreground' : 'text-muted-foreground'
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                    {step.phase && (
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-                        Phase {step.phase}
-                      </span>
-                    )}
-                    {step.status === 'complete' && (
-                      <span className="ml-auto text-xs text-green-400 font-medium">Done ✓</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* AI feature preview */}
-          <div className="glass-card rounded-2xl border border-violet-500/20 p-6">
-            <div className="flex items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/15">
-                <Sparkles className="size-4 text-violet-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">AI-Powered Resume Matching</h3>
-                  <span className="ai-badge">
-                    <Sparkles className="size-3" /> AI
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  When you upload your resume, our AI will score your match against each job
-                  description and tell you exactly why — not just a bare number.
-                  Available in Phase 4.
-                </p>
-              </div>
-            </div>
-          </div>
+      
+      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, {user?.name?.split(' ')[0] || 'Candidate'}</h1>
+          <p className="text-muted-foreground mt-2">Find your next role and track your applications.</p>
         </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-4 border-b mb-6">
+          <button
+            onClick={() => setActiveTab('available')}
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'available' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Available Jobs
+          </button>
+          <button
+            onClick={() => setActiveTab('applications')}
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'applications' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            My Applications ({applications.length})
+          </button>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-4 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-24 bg-muted rounded-xl" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-destructive/5 rounded-2xl border border-destructive/20">
+            <p className="text-destructive font-medium">{error}</p>
+            <button onClick={fetchDashboardData} className="mt-4 text-sm font-medium hover:underline text-destructive">
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6 page-enter">
+            {activeTab === 'available' && (
+              <>
+                {jobs.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-muted/30">
+                    <Briefcase className="size-12 text-muted-foreground/30 mb-4" />
+                    <h3 className="text-lg font-medium">No open positions</h3>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                      Check back later for new opportunities.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {jobs.map(job => {
+                      const applied = hasApplied(job._id);
+                      return (
+                        <div key={job._id} className="glass-card flex flex-col sm:flex-row gap-4 p-5 rounded-xl border items-start sm:items-center justify-between transition-shadow hover:shadow-sm">
+                          <div className="space-y-1">
+                            <h3 className="font-medium text-foreground text-lg">{job.title}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="font-medium text-primary/70">{job.department}</span>
+                              <span>•</span>
+                              <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                            {applied ? (
+                              <div className="flex items-center justify-center gap-2 rounded-lg bg-muted px-4 py-2 text-sm font-medium text-muted-foreground w-full sm:w-auto border border-transparent">
+                                <CheckCircle2 className="size-4" />
+                                Applied
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setSelectedJob(job)}
+                                className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 w-full sm:w-auto shadow-sm"
+                              >
+                                <Send className="size-4" />
+                                Apply Now
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === 'applications' && (
+              <>
+                {applications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-muted/30">
+                    <Send className="size-12 text-muted-foreground/30 mb-4" />
+                    <h3 className="text-lg font-medium">No applications yet</h3>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                      You haven't applied to any jobs yet. Check the Available Jobs tab to get started.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('available')}
+                      className="mt-6 text-sm font-medium text-primary hover:underline"
+                    >
+                      Browse Jobs
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {applications.map(app => (
+                      <div key={app._id} className="glass-card flex flex-col sm:flex-row gap-4 p-5 rounded-xl border items-start sm:items-center justify-between transition-shadow hover:shadow-sm">
+                        <div className="space-y-1">
+                          <h3 className="font-medium text-foreground text-lg">
+                            {app.jobId?.title || 'Unknown Job'}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span className="font-medium text-primary/70">{app.jobId?.department || 'Unknown'}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3" />
+                              Applied {new Date(app.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[app.status] || statusColors.applied}`}>
+                            {app.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </main>
+
+      <JobApplicationForm 
+        job={selectedJob} 
+        isOpen={!!selectedJob} 
+        onClose={() => setSelectedJob(null)} 
+        onApplied={handleApplicationSuccess}
+      />
     </div>
   );
 }
