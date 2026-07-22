@@ -27,6 +27,11 @@ export const createApplication = async (jobId, candidateId, callerRole, fileBuff
       candidateId,
       resumeUrl: uploadResult.secure_url,
       status: 'applied',
+      timeline: [{
+        status: 'applied',
+        changedBy: candidateId,
+        notes: 'Application submitted',
+      }]
     });
 
     return application;
@@ -68,3 +73,52 @@ export const getJobApplications = async (jobId, callerRole) => {
 
   return applications;
 };
+
+/**
+ * Valid allowed transitions for the Kanban pipeline
+ */
+const ALLOWED_TRANSITIONS = {
+  applied: ['screening', 'rejected'],
+  screening: ['interviewing', 'rejected'],
+  interviewing: ['offered', 'rejected'],
+  offered: ['hired', 'rejected'],
+  hired: [], // Terminal
+  rejected: [], // Terminal
+};
+
+/**
+ * Updates an application's stage (HR only)
+ */
+export const updateApplicationStage = async (applicationId, callerId, callerRole, newStatus, notes) => {
+  if (callerRole !== 'hr') {
+    throw new AppError("Role 'candidate' is not permitted to access this resource", 403);
+  }
+
+  const application = await Application.findById(applicationId);
+  if (!application) {
+    throw new AppError('Application not found', 404);
+  }
+
+  const currentStatus = application.status;
+  
+  if (currentStatus === 'hired' || currentStatus === 'rejected') {
+    throw new AppError(`Cannot transition from terminal state: ${currentStatus}`, 400);
+  }
+
+  const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || [];
+  if (!allowedNextStates.includes(newStatus)) {
+    throw new AppError(`Invalid transition from ${currentStatus} to ${newStatus}`, 400);
+  }
+
+  application.status = newStatus;
+  application.timeline.push({
+    status: newStatus,
+    changedBy: callerId,
+    notes: notes || `Moved to ${newStatus}`,
+  });
+
+  await application.save();
+
+  return application;
+};
+

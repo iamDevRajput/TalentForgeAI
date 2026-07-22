@@ -38,3 +38,21 @@ export const validateApplicationSubmit = (req, res, next) => {
     next(error);
   }
 };
+
+const stageSchema = z.object({
+  status: z.enum(['screening', 'interviewing', 'offered', 'hired', 'rejected']),
+  notes: z.string().max(500).optional(),
+});
+
+export const validateApplicationStage = (req, res, next) => {
+  try {
+    const result = stageSchema.safeParse(req.body);
+    if (!result.success) {
+      throw new AppError('Invalid stage update data', 400, result.error.format());
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+

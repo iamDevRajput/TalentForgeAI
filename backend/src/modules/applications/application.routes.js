@@ -4,10 +4,11 @@ import {
   submitApplication,
   getMyApplications,
   getJobApplications,
+  updateStage,
 } from './application.controller.js';
 import { authenticate } from '../../middlewares/auth.js';
 import { authorize } from '../../middlewares/rbac.js';
-import { validateApplicationSubmit } from './application.validator.js';
+import { validateApplicationSubmit, validateApplicationStage } from './application.validator.js';
 import { withAudit } from '../../middlewares/auditLogger.js';
 
 const router = express.Router();
@@ -35,5 +36,13 @@ router.post(
 
 // HR routes
 router.get('/job/:jobId', authorize('hr'), getJobApplications);
+
+router.patch(
+  '/:id/stage',
+  authorize('hr'),
+  validateApplicationStage,
+  withAudit('UPDATE_APPLICATION_STAGE', 'application', (req) => req.params.id),
+  updateStage
+);
 
 export default router;

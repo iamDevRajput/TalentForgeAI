@@ -45,3 +45,24 @@ export const getJobApplications = asyncHandler(async (req, res) => {
     data: { applications },
   });
 });
+
+export const updateStage = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status, notes } = req.body;
+  const callerId = req.user.id;
+  const callerRole = req.user.role;
+
+  const application = await applicationService.updateApplicationStage(
+    id,
+    callerId,
+    callerRole,
+    status,
+    notes
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: { application },
+  });
+});
+
