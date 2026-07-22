@@ -1,0 +1,270 @@
+/**
+ * index.css — Global styles + Tailwind v4 base
+ *
+ * Tailwind v4 is CSS-first: no tailwind.config.js required.
+ * All customisation lives here using @theme and CSS custom properties.
+ *
+ * shadcn/ui uses CSS variables on :root for its design tokens.
+ * We extend those with HireFlow's brand-specific palette.
+ */
+
+@import "tailwindcss";
+
+/* ── Tailwind v4 CSS-first theme definition ─────────────────────────────────── */
+/* Maps our CSS variables into Tailwind's utility system                        */
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-muted: hsl(var(--sidebar-muted));
+  --radius-DEFAULT: var(--radius);
+}
+
+/* ── shadcn/ui CSS variable convention ──────────────────────────────────────── */
+/* These are consumed by shadcn components via `hsl(var(--background))` etc.   */
+
+:root {
+  /* Dark-mode-first: these are the DARK values (default) */
+  --background: 222 47% 6%;           /* Near-black indigo background */
+  --foreground: 213 31% 91%;          /* Soft white text */
+
+  --card: 222 47% 9%;                 /* Slightly lighter than bg for card elevation */
+  --card-foreground: 213 31% 91%;
+
+  --popover: 222 47% 9%;
+  --popover-foreground: 213 31% 91%;
+
+  --primary: 245 80% 65%;             /* Electric violet — main brand accent */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 217 33% 17%;           /* Muted blue-gray for secondary actions */
+  --secondary-foreground: 213 31% 91%;
+
+  --muted: 217 33% 13%;
+  --muted-foreground: 215 20% 55%;
+
+  --accent: 245 80% 65%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 63% 58%;           /* Error red */
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 142 72% 45%;             /* Hired/success green */
+  --success-foreground: 0 0% 100%;
+
+  --warning: 38 95% 56%;              /* Warning amber */
+  --warning-foreground: 0 0% 10%;
+
+  --border: 217 33% 18%;
+  --input: 217 33% 18%;
+  --ring: 245 80% 65%;                /* Focus ring = primary */
+
+  --radius: 0.625rem;                  /* 10px default border radius */
+
+  /* AI badge tokens (PRD NFR: AI-generated content must be visually distinct) */
+  --ai-badge-bg: 270 70% 20%;
+  --ai-badge-border: 270 70% 40%;
+  --ai-badge-text: 270 90% 80%;
+  --ai-badge-glow: 270 80% 50%;
+
+  /* Chart / analytics palette */
+  --chart-1: 245 80% 65%;
+  --chart-2: 142 72% 45%;
+  --chart-3: 38 95% 56%;
+  --chart-4: 200 70% 55%;
+  --chart-5: 340 70% 60%;
+
+  /* Sidebar specific */
+  --sidebar: 222 47% 7%;
+  --sidebar-foreground: 213 31% 91%;
+  --sidebar-border: 217 33% 15%;
+  --sidebar-accent: 245 80% 65%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-muted: 215 20% 50%;
+}
+
+/* Light mode overrides (opt-in via .light class on <html>) */
+.light {
+  --background: 0 0% 98%;
+  --foreground: 222 47% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 8%;
+  --primary: 245 75% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 94%;
+  --secondary-foreground: 222 47% 12%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 20% 40%;
+  --accent: 245 75% 55%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 245 75% 55%;
+  --sidebar: 210 40% 96%;
+  --sidebar-border: 214 32% 88%;
+}
+
+/* ── Base element styles ─────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100dvh;
+  }
+
+  /* Focus visible only on keyboard navigation, not mouse click */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+  }
+
+  /* Remove default focus ring */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Scrollbar styling — subtle, matching dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+/* ── Utility classes ─────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  /* Glassmorphism card — used for dashboard panels */
+  .glass-card {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    box-shadow:
+      0 4px 6px -1px hsl(222 47% 2% / 0.4),
+      0 2px 4px -1px hsl(222 47% 2% / 0.2),
+      inset 0 1px 0 hsl(var(--foreground) / 0.04);
+  }
+
+  /* AI-generated content badge */
+  .ai-badge {
+    background: hsl(var(--ai-badge-bg));
+    border: 1px solid hsl(var(--ai-badge-border));
+    color: hsl(var(--ai-badge-text));
+    box-shadow: 0 0 8px hsl(var(--ai-badge-glow) / 0.25);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: calc(var(--radius) - 4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Gradient text — for headings */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(245 80% 70%), hsl(200 80% 65%), hsl(270 80% 70%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Subtle animated gradient background for auth pages */
+  .gradient-bg {
+    background:
+      radial-gradient(ellipse at 20% 50%, hsl(245 80% 15% / 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, hsl(200 80% 15% / 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, hsl(270 80% 15% / 0.2) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+
+  /* Page fade-in animation */
+  .page-enter {
+    animation: page-enter 0.2s ease-out;
+  }
+
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--radius);
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Pipeline stage badge colors */
+  .stage-applied    { background: rgb(59 130 246 / 0.15); color: rgb(96 165 250); border: 1px solid rgb(59 130 246 / 0.3); }
+  .stage-screening  { background: rgb(234 179 8 / 0.15); color: rgb(250 204 21); border: 1px solid rgb(234 179 8 / 0.3); }
+  .stage-interview  { background: rgb(168 85 247 / 0.15); color: rgb(192 132 252); border: 1px solid rgb(168 85 247 / 0.3); }
+  .stage-offer      { background: rgb(249 115 22 / 0.15); color: rgb(251 146 60); border: 1px solid rgb(249 115 22 / 0.3); }
+  .stage-hired      { background: rgb(34 197 94 / 0.15); color: rgb(74 222 128); border: 1px solid rgb(34 197 94 / 0.3); }
+  .stage-rejected   { background: rgb(239 68 68 / 0.15); color: rgb(248 113 113); border: 1px solid rgb(239 68 68 / 0.3); }
+}
