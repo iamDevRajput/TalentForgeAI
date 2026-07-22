@@ -25,7 +25,13 @@ export function getRedisClient() {
     });
 
     redisClient.on('connect', () => logger.info('✅  Redis connected'));
-    redisClient.on('error', (err) => logger.error(`Redis error: ${err.message}`));
+    redisClient.on('error', (err) => {
+      if (env.NODE_ENV === 'production') {
+        logger.error(`Redis error: ${err.message}`);
+      } else {
+        logger.error('Redis connection failed, but proceeding without it in dev:', err.message);
+      }
+    });
     redisClient.on('reconnecting', () => logger.warn('Redis reconnecting...'));
   }
 
@@ -36,9 +42,17 @@ export function getRedisClient() {
  * Explicitly pings Redis. Called by server.js during startup.
  */
 export async function connectRedis() {
-  const client = getRedisClient();
-  await client.connect();
-  await client.ping();
+  try {
+    const client = getRedisClient();
+    await client.connect();
+    await client.ping();
+  } catch (err) {
+    if (env.NODE_ENV === 'production') {
+      logger.error('Redis connection failed. Refusing to start in production without Redis.', err);
+      throw err;
+    }
+    logger.warn('Skipping Redis connection for local QA...');
+  }
 }
 
 export async function disconnectRedis() {

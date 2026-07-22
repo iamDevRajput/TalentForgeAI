@@ -22,7 +22,7 @@ export default defineConfig({
       // Proxy all /api calls to the backend in development.
       // In production, NGINX or a reverse proxy handles this.
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5050',
         changeOrigin: true,
         secure: false,
       },
