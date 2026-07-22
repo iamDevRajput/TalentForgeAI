@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { jobApi } from './jobApi';
 import CreateJobModal from './CreateJobModal';
-import { Plus, Briefcase, ChevronDown, Loader2 } from 'lucide-react';
+import { Plus, Briefcase, ChevronDown, Loader2, Layout } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function JobsView() {
   const [jobs, setJobs] = useState([]);
@@ -151,6 +152,13 @@ export default function JobsView() {
                     </div>
                   </div>
                 )}
+                <Link
+                  to={`/hr/jobs/${job._id}/pipeline`}
+                  className="flex items-center justify-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                >
+                  <Layout className="size-3" />
+                  View Pipeline
+                </Link>
               </div>
             </div>
           ))}

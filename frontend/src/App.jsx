@@ -29,6 +29,7 @@ import RegisterPage from '@/features/auth/RegisterPage';
 
 // Role dashboards (Phase 1 shells)
 import HRDashboard from '@/features/hr/HRDashboard';
+import JobPipeline from '@/features/hr/JobPipeline';
 import InterviewerDashboard from '@/features/interviewer/InterviewerDashboard';
 import CandidateDashboard from '@/features/candidate/CandidateDashboard';
 
@@ -77,6 +78,14 @@ export default function App() {
           }
         />
         {/* Phase 2+: /hr/jobs, /hr/candidates, /hr/pipeline, etc. */}
+        <Route
+          path="/hr/jobs/:jobId/pipeline"
+          element={
+            <ProtectedRoute allowedRoles={['hr']}>
+              <JobPipeline />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Interviewer routes */}
         <Route
