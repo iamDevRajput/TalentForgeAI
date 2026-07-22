@@ -34,6 +34,7 @@ import { AppError } from './utils/AppError.js';
 // ── Route imports (each phase adds its own module here) ─────────────────────
 import authRouter from './modules/auth/auth.routes.js';
 import jobsRouter from './modules/jobs/job.routes.js';
+import applicationsRouter from './modules/applications/application.routes.js';
 
 const app = express();
 
@@ -104,9 +105,9 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/jobs', jobsRouter);
+app.use('/api/applications', applicationsRouter);
 
 // Phase 3+: app.use('/api/candidates', authenticate, candidatesRouter);
-// Phase 5+: app.use('/api/applications', authenticate, applicationsRouter);
 // Phase 7+: app.use('/api/interviews', authenticate, interviewsRouter);
 // Phase 11+: app.use('/api/analytics', authenticate, analyticsRouter);
 
