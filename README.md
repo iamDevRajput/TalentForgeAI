@@ -1,6 +1,6 @@
-# HireFlow AI
+# TalentForgeAI
 
-HireFlow AI is a streamlined ATS platform for modern hiring teams, unifying job posting, applicant tracking, and AI-assisted candidate evaluation into a single ecosystem. 
+TalentForgeAI is a streamlined ATS platform for modern hiring teams, unifying job posting, applicant tracking, and AI-assisted candidate evaluation into a single ecosystem. 
 
 ## Architecture
 This is an NPM workspaces monorepo:

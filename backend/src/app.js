@@ -96,7 +96,7 @@ app.get('/api/health', (_req, res) => {
   res.status(200).json({
     success: true,
     status: 'ok',
-    service: 'hireflow-api',
+    service: 'talentforgeai-api',
     timestamp: new Date().toISOString(),
     environment: env.NODE_ENV,
   });

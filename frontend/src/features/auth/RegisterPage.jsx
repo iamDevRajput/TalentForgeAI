@@ -73,7 +73,7 @@ export default function RegisterPage() {
             <Sparkles className="size-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Join <span className="gradient-text">HireFlow AI</span>
+            Join <span className="gradient-text">TalentForgeAI</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Create your candidate account to start applying

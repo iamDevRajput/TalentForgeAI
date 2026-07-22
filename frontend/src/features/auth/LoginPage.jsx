@@ -70,7 +70,7 @@ export default function LoginPage() {
             <Sparkles className="size-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome to <span className="gradient-text">HireFlow AI</span>
+            Welcome to <span className="gradient-text">TalentForgeAI</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to your account to continue

@@ -5,7 +5,7 @@
  * All customisation lives here using @theme and CSS custom properties.
  *
  * shadcn/ui uses CSS variables on :root for its design tokens.
- * We extend those with HireFlow's brand-specific palette.
+ * We extend those with TalentForgeAI's brand-specific palette.
  */
 
 @import "tailwindcss";

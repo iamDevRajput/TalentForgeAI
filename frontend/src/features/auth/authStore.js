@@ -25,7 +25,7 @@ export const useAuthStore = create(
       setLoading: (isLoading) => set({ isLoading }),
     }),
     {
-      name: 'hireflow-auth',       // localStorage key
+      name: 'talentforgeai-auth',       // localStorage key
       partialize: (state) => ({    // Only persist user, not isLoading
         user: state.user,
       }),

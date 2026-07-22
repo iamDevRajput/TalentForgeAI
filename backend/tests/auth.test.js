@@ -2,7 +2,7 @@
  * auth.test.js — Integration tests for auth endpoints
  *
  * Uses supertest to make HTTP requests against the real Express app.
- * Uses a separate test MongoDB (hireflow-ai-test) to avoid polluting dev data.
+ * Uses a separate test MongoDB (talentforgeai-test) to avoid polluting dev data.
  *
  * Test coverage:
  *   - POST /api/auth/register (candidate)

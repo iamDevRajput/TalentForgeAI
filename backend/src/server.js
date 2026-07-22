@@ -33,7 +33,7 @@ async function startServer() {
 
     // 2. Bind HTTP server
     server = app.listen(env.PORT, () => {
-      logger.info(`🚀  HireFlow API running on port ${env.PORT} [${env.NODE_ENV}]`);
+      logger.info(`🚀  TalentForgeAI API running on port ${env.PORT} [${env.NODE_ENV}]`);
       logger.info(`📡  Health check: http://localhost:${env.PORT}/api/health`);
     });
 

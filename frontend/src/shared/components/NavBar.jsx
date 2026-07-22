@@ -45,7 +45,7 @@ export default function NavBar() {
             <Sparkles className="size-4 text-primary-foreground" />
           </div>
           <span className="font-semibold tracking-tight text-foreground">
-            HireFlow <span className="gradient-text">AI</span>
+            TalentForgeAI <span className="gradient-text">AI</span>
           </span>
         </Link>
 
