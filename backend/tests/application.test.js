@@ -1,17 +1,48 @@
-import request from 'supertest';
+import { jest } from '@jest/globals';
+
+jest.unstable_mockModule('mime', () => ({
+  default: {
+    getType: () => 'application/json',
+    getExtension: () => 'json'
+  },
+  getType: () => 'application/json',
+  getExtension: () => 'json'
+}));
+
+import { Writable } from 'stream';
+
+let cloudinaryMockError = null;
+
+jest.unstable_mockModule('cloudinary', () => ({
+  v2: {
+    uploader: {
+      upload_stream: jest.fn((options, cb) => {
+        return new Writable({
+          write(chunk, encoding, callback) {
+            callback();
+          },
+          final(callback) {
+            if (cloudinaryMockError) {
+              cb(cloudinaryMockError, null);
+            } else {
+              cb(null, { secure_url: 'https://cloudinary.com/resume.pdf' });
+            }
+            callback();
+          }
+        });
+      })
+    }
+  }
+}));
+
+const { default: request } = await import('supertest');
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import app from '../src/app.js';
-import User from '../src/models/User.js';
-import Job from '../src/models/Job.js';
-import Application from '../src/models/Application.js';
-import AuditLog from '../src/models/AuditLog.js';
-
-// Mock the Cloudinary upload helper
-jest.mock('../src/modules/uploads/upload.service.js', () => ({
-  uploadResumeToCloudinary: jest.fn(),
-}));
-import { uploadResumeToCloudinary } from '../src/modules/uploads/upload.service.js';
+const { default: app } = await import('../src/app.js');
+const { default: User } = await import('../src/models/User.js');
+const { default: Job } = await import('../src/models/Job.js');
+const { default: Application } = await import('../src/models/Application.js');
+const { default: AuditLog } = await import('../src/models/AuditLog.js');
 
 let mongoServer;
 let hrToken;
@@ -29,10 +60,10 @@ beforeAll(async () => {
   hrUser = await User.create({
     name: 'HR User',
     email: 'hr@example.com',
-    passwordHash: 'hashedpassword',
+    passwordHash: 'Password123!',
     role: 'hr',
   });
-  const hrRes = await request(app).post('/api/auth/login').send({
+  const hrRes = await request(app).post('/api/auth/login').set('Content-Type', 'application/json').send({
     email: 'hr@example.com',
     password: 'Password123!',
   });
@@ -42,10 +73,10 @@ beforeAll(async () => {
   candidateUserA = await User.create({
     name: 'Candidate A',
     email: 'candA@example.com',
-    passwordHash: 'hashedpassword',
+    passwordHash: 'Password123!',
     role: 'candidate',
   });
-  const candResA = await request(app).post('/api/auth/login').send({
+  const candResA = await request(app).post('/api/auth/login').set('Content-Type', 'application/json').send({
     email: 'candA@example.com',
     password: 'Password123!',
   });
@@ -55,10 +86,10 @@ beforeAll(async () => {
   candidateUserB = await User.create({
     name: 'Candidate B',
     email: 'candB@example.com',
-    passwordHash: 'hashedpassword',
+    passwordHash: 'Password123!',
     role: 'candidate',
   });
-  const candResB = await request(app).post('/api/auth/login').send({
+  const candResB = await request(app).post('/api/auth/login').set('Content-Type', 'application/json').send({
     email: 'candB@example.com',
     password: 'Password123!',
   });
@@ -110,7 +141,7 @@ describe('Application Module', () => {
 
   describe('POST /api/applications/:jobId', () => {
     it('1. Candidate applies to an open job → 201, resume metadata stored correctly', async () => {
-      uploadResumeToCloudinary.mockResolvedValueOnce({ secure_url: 'https://cloudinary.com/resume.pdf' });
+
 
       const res = await request(app)
         .post(`/api/applications/${openJob._id}`)
@@ -143,7 +174,7 @@ describe('Application Module', () => {
     });
 
     it('4. Candidate applies twice to the same open job → 409 on the second attempt', async () => {
-      uploadResumeToCloudinary.mockResolvedValue({ secure_url: 'https://url' });
+
 
       await request(app)
         .post(`/api/applications/${openJob._id}`)
@@ -198,24 +229,24 @@ describe('Application Module', () => {
     });
 
     it('12. Verify Cloudinary upload failure is handled gracefully', async () => {
-      uploadResumeToCloudinary.mockRejectedValueOnce(new Error('Cloudinary timeout'));
+      cloudinaryMockError = new Error('Cloudinary timeout');
 
       const res = await request(app)
         .post(`/api/applications/${openJob._id}`)
         .set('Authorization', `Bearer ${candidateTokenA}`)
         .attach('resume', pdfBuffer, { filename: 'resume.pdf', contentType: 'application/pdf' });
 
-      expect(res.status).toBe(500); // Because it is an unhandled Error but wrapped by errorHandler
-      // Or 502 if mapped in the service. The service throws 502 in our implementation!
+      // 502 because it is mapped in the service.
       expect(res.status).toBe(502);
       expect(res.body.error.message).toBe('Failed to upload file to storage service');
       expect(res.body.error).not.toHaveProperty('stack');
+      cloudinaryMockError = null; // Reset for next tests
     });
   });
 
   describe('GET /api/applications/my', () => {
     it('7. Candidate A cannot see Candidate B\'s applications', async () => {
-      uploadResumeToCloudinary.mockResolvedValue({ secure_url: 'https://url' });
+      cloudinaryMockError = null;
 
       // A applies
       await request(app)
@@ -241,7 +272,7 @@ describe('Application Module', () => {
 
   describe('GET /api/applications/job/:jobId', () => {
     it('8. HR can see all applications for a job', async () => {
-      uploadResumeToCloudinary.mockResolvedValue({ secure_url: 'https://url' });
+
 
       await request(app)
         .post(`/api/applications/${openJob._id}`)

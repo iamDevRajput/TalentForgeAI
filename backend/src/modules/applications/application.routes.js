@@ -5,9 +5,10 @@ import {
   getMyApplications,
   getJobApplications,
 } from './application.controller.js';
-import { authenticate, authorize } from '../../middlewares/auth.js';
+import { authenticate } from '../../middlewares/auth.js';
+import { authorize } from '../../middlewares/rbac.js';
 import { validateApplicationSubmit } from './application.validator.js';
-import auditLogger from '../../middlewares/auditLogger.js';
+import { withAudit } from '../../middlewares/auditLogger.js';
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.post(
   authorize('candidate'),
   upload.single('resume'),
   validateApplicationSubmit,
-  auditLogger('SUBMIT_APPLICATION', 'application', (req, resBody) => resBody?.data?.application?._id),
+  withAudit('SUBMIT_APPLICATION', 'application', (req, resBody) => resBody?.data?.application?._id),
   submitApplication
 );
 
