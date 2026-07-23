@@ -1,3 +1,5 @@
+import EmptyState from "@/shared/components/EmptyState";
+import DashboardHero from "@/shared/components/DashboardHero";
 import { useState, useEffect, useMemo } from 'react';
 import NavBar from '@/shared/components/NavBar';
 import { useAuthStore } from '@/features/auth/authStore';
@@ -239,18 +241,15 @@ export default function CandidateDashboard() {
       <NavBar />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <p className="text-[12px] font-semibold text-primary uppercase tracking-widest">Candidate Portal</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
-            Welcome back, {user?.name?.split(' ')[0] || 'Candidate'} 👋
-          </h1>
-          <p className="text-muted-foreground mt-1.5 text-[15px]">
-            Find your next opportunity and track your applications.
-          </p>
-        </div>
+            {/* Header */}
+            <DashboardHero 
+              title="Candidate Portal" 
+              subtitle="Track your applications and view upcoming interviews."
+              actionLabel="Browse Jobs"
+              action={() => {}} // Phase 2: Redirect to jobs board
+            />
 
-        {/* KPI Cards */}
+            {/* Application Progress */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {kpis.map(k => <KpiCard key={k.label} {...k} />)}
         </div>
@@ -373,25 +372,15 @@ export default function CandidateDashboard() {
                 )}
 
                 {filteredJobs.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="flex size-16 items-center justify-center rounded-2xl bg-muted/60 mb-4">
-                      <Briefcase className="size-8 text-muted-foreground/40" />
-                    </div>
-                    <h3 className="text-[16px] font-semibold text-foreground">No jobs found</h3>
-                    <p className="text-[13px] text-muted-foreground mt-2 max-w-sm">
-                      {search || filterWorkplace || filterType
-                        ? 'Try adjusting your search or filters to find more opportunities.'
-                        : 'No open positions right now. Check back later!'}
-                    </p>
-                    {(search || filterWorkplace || filterType) && (
-                      <button
-                        onClick={() => { setSearch(''); setFilterWorkplace(''); setFilterType(''); }}
-                        className="mt-4 text-[13px] font-semibold text-primary hover:underline underline-offset-4"
-                      >
-                        Clear filters
-                      </button>
-                    )}
-                  </div>
+                  <EmptyState 
+                    icon={Briefcase}
+                    title="No jobs found"
+                    description={search || filterWorkplace || filterType
+                      ? 'Try adjusting your search or filters to find more opportunities.'
+                      : 'No open positions right now. Check back later!'}
+                    action={search || filterWorkplace || filterType ? () => { setSearch(''); setFilterWorkplace(''); setFilterType(''); } : null}
+                    actionLabel={search || filterWorkplace || filterType ? "Clear filters" : null}
+                  />
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {filteredJobs.map(job => (
@@ -411,21 +400,13 @@ export default function CandidateDashboard() {
             {activeTab === 'applications' && (
               <>
                 {applications.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="flex size-16 items-center justify-center rounded-2xl bg-muted/60 mb-4">
-                      <Send className="size-8 text-muted-foreground/40" />
-                    </div>
-                    <h3 className="text-[16px] font-semibold text-foreground">No applications yet</h3>
-                    <p className="text-[13px] text-muted-foreground mt-2 max-w-sm">
-                      You haven't applied to any positions yet. Browse available jobs to get started.
-                    </p>
-                    <button
-                      onClick={() => setActiveTab('available')}
-                      className="mt-5 group flex items-center gap-1.5 rounded-xl bg-gradient-to-b from-primary to-primary/90 px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-all hover:scale-105 hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] active:scale-95"
-                    >
-                      Browse Jobs
-                    </button>
-                  </div>
+                  <EmptyState 
+                    icon={Send}
+                    title="No applications yet"
+                    description="You haven't applied to any positions yet. Browse available jobs to get started."
+                    action={() => setActiveTab('available')}
+                    actionLabel="Browse Jobs"
+                  />
                 ) : (
                   <div className="flex flex-col gap-3">
                     {applications.map(app => (

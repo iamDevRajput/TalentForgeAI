@@ -1,3 +1,4 @@
+import EmptyState from "@/shared/components/EmptyState";
 /**
  * HRDashboard.jsx — Full ATS home page for HR role
  *
@@ -17,13 +18,14 @@ import {
   Briefcase, Users, TrendingUp, Calendar, Plus,
   ArrowRight, Activity, Clock, CheckCircle2
 } from 'lucide-react';
+import DashboardHero from '@/shared/components/DashboardHero';
 
 const FUNNEL_STAGES = [
-  { key: 'applied',      label: 'Applied',      color: 'bg-blue-500' },
-  { key: 'screening',    label: 'Screening',     color: 'bg-amber-500' },
-  { key: 'interviewing', label: 'Interviewing',  color: 'bg-violet-500' },
-  { key: 'offered',      label: 'Offered',       color: 'bg-orange-500' },
-  { key: 'hired',        label: 'Hired',         color: 'bg-emerald-500' },
+  { key: 'applied',      label: 'Applied' },
+  { key: 'screening',    label: 'Screening' },
+  { key: 'interviewing', label: 'Interviewing' },
+  { key: 'offered',      label: 'Offered' },
+  { key: 'hired',        label: 'Hired' },
 ];
 
 const STAGE_BADGE = {
@@ -122,23 +124,13 @@ export default function HRDashboard() {
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl p-6 lg:p-8 space-y-8">
 
-            {/* Page Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-semibold text-primary uppercase tracking-widest">HR Dashboard</p>
-                <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
-                  Good {getGreeting()}, {user?.name?.split(' ')[0] || 'HR'} 👋
-                </h1>
-                <p className="text-[13px] text-muted-foreground mt-1">
-                  Here's what's happening in your hiring pipeline today.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] text-muted-foreground">
-                  {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </span>
-              </div>
-            </div>
+            {/* Header */}
+            <DashboardHero 
+              title="HR Command Center" 
+              subtitle="Manage your hiring pipeline and review active candidates across all open roles."
+              actionLabel="Post New Role"
+              action={() => {}} // Phase 2: Post role modal
+            />
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -161,23 +153,25 @@ export default function HRDashboard() {
                 </div>
                 {loadingStats ? (
                   <div className="space-y-3">
-                    {[1,2,3,4,5].map(i => <div key={i} className="h-8 skeleton rounded-lg" />)}
+                    {[1,2,3,4,5].map(i => <div key={i} className="h-8 skeleton rounded-[4px]" />)}
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {FUNNEL_STAGES.map(stage => {
+                    {FUNNEL_STAGES.map((stage, i) => {
                       const count = stats?.funnelCounts[stage.key] || 0;
-                      const pct = Math.round((count / maxFunnel) * 100);
+                      const pct = Math.round((count / maxFunnel) * 100) || 0;
                       return (
-                        <div key={stage.key} className="flex items-center gap-3">
-                          <span className="w-24 shrink-0 text-[12px] font-medium text-muted-foreground">{stage.label}</span>
-                          <div className="flex-1 h-6 bg-muted/40 rounded-lg overflow-hidden">
+                        <div key={stage.key} className="flex items-center gap-3 group">
+                          <span className="w-24 shrink-0 text-[12px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{stage.label}</span>
+                          <div className="flex-1 h-6 bg-muted/30 rounded-[4px] overflow-hidden flex items-center">
                             <div
-                              className={`h-full ${stage.color} opacity-80 rounded-lg transition-all duration-700`}
-                              style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
+                              className={`h-full bg-primary rounded-[4px] transition-all duration-700 ease-out`}
+                              style={{ width: `${pct}%`, opacity: Math.max(1 - i * 0.15, 0.3) }}
                             />
                           </div>
-                          <span className="w-6 shrink-0 text-right text-[12px] font-bold text-foreground">{count}</span>
+                          <span className="w-10 text-right text-[12px] font-bold text-foreground">
+                            {count}
+                          </span>
                         </div>
                       );
                     })}
@@ -221,10 +215,12 @@ export default function HRDashboard() {
                     {[1,2,3].map(i => <div key={i} className="h-14 skeleton rounded-lg" />)}
                   </div>
                 ) : recentApps.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Users className="size-8 text-muted-foreground/30 mb-2" />
-                    <p className="text-[13px] text-muted-foreground">No applications yet</p>
-                  </div>
+                  <EmptyState 
+                    icon={Users}
+                    title="No recent applications"
+                    description="When candidates apply for your open roles, they will appear here."
+                    className="border-none bg-transparent p-6"
+                  />
                 ) : (
                   <div className="space-y-2">
                     {recentApps.map(app => (
@@ -256,10 +252,12 @@ export default function HRDashboard() {
                     {[1,2,3].map(i => <div key={i} className="h-14 skeleton rounded-lg" />)}
                   </div>
                 ) : upcomingInterviews.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Calendar className="size-8 text-muted-foreground/30 mb-2" />
-                    <p className="text-[13px] text-muted-foreground">No scheduled interviews</p>
-                  </div>
+                  <EmptyState 
+                    icon={Calendar}
+                    title="No upcoming interviews"
+                    description="You don't have any interviews scheduled for the near future."
+                    className="border-none bg-transparent p-6"
+                  />
                 ) : (
                   <div className="space-y-2">
                     {upcomingInterviews.map(inv => (

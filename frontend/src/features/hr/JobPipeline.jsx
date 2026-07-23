@@ -93,7 +93,7 @@ export default function JobPipeline() {
 
         <main className="flex-1 flex flex-col overflow-hidden">
           {/* Pipeline Header */}
-          <div className="flex items-center justify-between border-b border-border/40 bg-background/80 px-6 py-4 backdrop-blur-sm">
+          <div className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/hr/dashboard')}
@@ -135,10 +135,10 @@ export default function JobPipeline() {
                     return (
                       <div
                         key={stage}
-                        className={`flex w-72 flex-shrink-0 flex-col rounded-xl border border-border/40 bg-muted/20 ${cfg.accent}`}
+                        className={`flex w-72 flex-shrink-0 flex-col rounded-md border border-border bg-card`}
                       >
                         {/* Column Header */}
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-border/30">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                           <div className="flex items-center gap-2">
                             <div className={`size-2 rounded-full ${cfg.dot}`} />
                             <h3 className="text-[13px] font-bold text-foreground">{cfg.label}</h3>
@@ -160,8 +160,8 @@ export default function JobPipeline() {
                             >
                               <div className="flex flex-col gap-2.5">
                                 {cards.length === 0 && !snapshot.isDraggingOver && (
-                                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                                    <p className="text-[12px] text-muted-foreground/50">Drop candidates here</p>
+                                  <div className="flex flex-col items-center justify-center py-6 text-center rounded-[4px] border border-dashed border-border/50 bg-background/30">
+                                    <p className="text-[11px] font-medium text-muted-foreground/60 tracking-wide uppercase">Empty Stage</p>
                                   </div>
                                 )}
                                 {cards.map((app, index) => (

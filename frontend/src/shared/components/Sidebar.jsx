@@ -47,11 +47,11 @@ function NavItem({ item, collapsed }) {
       aria-label={item.label}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+        'group flex items-center gap-3 rounded-[4px] px-3 py-2 text-[13px] font-medium transition-colors duration-150',
+        'focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0',
         isActive
-          ? 'bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20'
-          : 'text-sidebar-muted hover:bg-secondary/50 hover:text-foreground',
+          ? 'bg-secondary/40 text-foreground'
+          : 'text-muted-foreground hover:bg-secondary/20 hover:text-foreground',
         collapsed && 'justify-center px-2',
       )}
     >
@@ -90,14 +90,14 @@ export default function Sidebar() {
       </nav>
 
       {/* Collapse toggle */}
-      <div className="border-t border-sidebar-border p-2">
+      <div className="border-t border-border p-2">
         <button
           id="sidebar-collapse-btn"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={cn(
-            'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-muted-foreground',
-            'transition-colors hover:bg-secondary/50 hover:text-foreground',
+            'flex w-full items-center gap-2 rounded-[4px] px-3 py-2 text-[13px] text-muted-foreground',
+            'transition-colors hover:bg-secondary/20 hover:text-foreground',
             collapsed && 'justify-center px-2',
           )}
         >

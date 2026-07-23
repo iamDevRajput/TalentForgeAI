@@ -44,63 +44,50 @@
 /* These are consumed by shadcn components via `hsl(var(--background))` etc.   */
 
 :root {
-  /* Dark-mode-first: these are the DARK values (default) */
-  --background: 222 47% 6%;           /* Near-black indigo background */
-  --foreground: 213 31% 91%;          /* Soft white text */
+  /* Obsidian Dark Theme - Enterprise AI */
+  --background: 240 10% 4%;           /* Stark, neutral near-black */
+  --foreground: 210 40% 98%;          /* Crisp white text */
 
-  --card: 222 47% 9%;                 /* Slightly lighter than bg for card elevation */
-  --card-foreground: 213 31% 91%;
+  --card: 240 10% 6%;                 /* Very dark gray, slightly above bg */
+  --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 9%;
-  --popover-foreground: 213 31% 91%;
+  --popover: 240 10% 6%;
+  --popover-foreground: 210 40% 98%;
 
-  --primary: 245 80% 65%;             /* Electric violet — main brand accent */
+  --primary: 260 100% 65%;            /* Electric Violet */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 33% 17%;           /* Muted blue-gray for secondary actions */
-  --secondary-foreground: 213 31% 91%;
+  --secondary: 190 90% 50%;           /* Soft Cyan */
+  --secondary-foreground: 240 10% 4%;
 
-  --muted: 217 33% 13%;
-  --muted-foreground: 215 20% 55%;
+  --muted: 240 10% 10%;               /* Subtle gray for inactive elements */
+  --muted-foreground: 240 5% 60%;
 
-  --accent: 245 80% 65%;
+  --accent: 260 100% 65%;
   --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 63% 58%;           /* Error red */
+  --destructive: 0 84% 60%;           /* Reserved for errors only */
   --destructive-foreground: 0 0% 100%;
 
-  --success: 142 72% 45%;             /* Hired/success green */
+  --success: 142 72% 45%;
   --success-foreground: 0 0% 100%;
 
-  --warning: 38 95% 56%;              /* Warning amber */
+  --warning: 38 92% 50%;              /* Reserved for warnings (Orange) */
   --warning-foreground: 0 0% 10%;
 
-  --border: 217 33% 18%;
-  --input: 217 33% 18%;
-  --ring: 245 80% 65%;                /* Focus ring = primary */
+  --border: 240 10% 15%;              /* Crisp structural borders */
+  --input: 240 10% 12%;
+  --ring: 260 100% 65%;
 
-  --radius: 0.625rem;                  /* 10px default border radius */
-
-  /* AI badge tokens (PRD NFR: AI-generated content must be visually distinct) */
-  --ai-badge-bg: 270 70% 20%;
-  --ai-badge-border: 270 70% 40%;
-  --ai-badge-text: 270 90% 80%;
-  --ai-badge-glow: 270 80% 50%;
-
-  /* Chart / analytics palette */
-  --chart-1: 245 80% 65%;
-  --chart-2: 142 72% 45%;
-  --chart-3: 38 95% 56%;
-  --chart-4: 200 70% 55%;
-  --chart-5: 340 70% 60%;
+  --radius: 0.5rem;                   /* 8px radius for enterprise structure */
 
   /* Sidebar specific */
-  --sidebar: 222 47% 7%;
-  --sidebar-foreground: 213 31% 91%;
-  --sidebar-border: 217 33% 15%;
-  --sidebar-accent: 245 80% 65%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-muted: 215 20% 50%;
+  --sidebar: 240 10% 4%;              /* Same as bg for unified command center feel */
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-border: 240 10% 12%;
+  --sidebar-accent: 240 10% 10%;
+  --sidebar-accent-foreground: 260 100% 65%;
+  --sidebar-muted: 240 5% 50%;
 }
 
 /* Light mode overrides (opt-in via .light class on <html>) */
@@ -147,6 +134,7 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     min-height: 100dvh;
+    /* Optional: very subtle global noise texture could go here if needed, but keeping it minimal for now */
   }
 
   /* Focus visible only on keyboard navigation, not mouse click */
@@ -166,7 +154,7 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
@@ -180,17 +168,6 @@
 /* ── Utility classes ─────────────────────────────────────────────────────────── */
 
 @layer utilities {
-  /* Glassmorphism card — used for dashboard panels */
-  .glass-card {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow:
-      0 4px 6px -1px hsl(222 47% 2% / 0.4),
-      0 2px 4px -1px hsl(222 47% 2% / 0.2),
-      inset 0 1px 0 hsl(var(--foreground) / 0.04);
-  }
 
   /* AI-generated content badge */
   .ai-badge {
@@ -342,16 +319,6 @@
   }
 
   /* Premium auth input — reusable */
-  .input-field {
-    width: 100%;
-    border-radius: 0.75rem;
-    border: 1px solid hsl(var(--border) / 0.5);
-    background: hsl(var(--background) / 0.5);
-    padding: 0.625rem 1rem;
-    font-size: 0.9375rem;
-    color: hsl(var(--foreground));
-    transition: all 0.15s ease;
-  }
   .input-field:hover { background: hsl(var(--background) / 0.8); }
   .input-field:focus {
     border-color: hsl(var(--primary));
@@ -378,24 +345,25 @@
   .kanban-hired      { border-top: 2px solid rgb(34 197 94 / 0.6); }
   .kanban-rejected   { border-top: 2px solid rgb(239 68 68 / 0.6); }
 
-  /* Kanban drag card */
+  /* Kanban specific styles */
   .kanban-card {
     background: hsl(var(--card));
-    border: 1px solid hsl(var(--border) / 0.6);
-    border-radius: 0.625rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 6px;
     padding: 0.875rem 1rem;
-    box-shadow: 0 1px 2px hsl(222 47% 2% / 0.3);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
     cursor: grab;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    transition: all 0.15s ease;
   }
   .kanban-card:hover {
-    box-shadow: 0 4px 12px hsl(222 47% 2% / 0.4);
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--border) / 0.8);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
   }
   .kanban-card-dragging {
-    box-shadow: 0 16px 40px hsl(222 47% 2% / 0.6), 0 0 0 2px hsl(var(--primary) / 0.4);
-    transform: rotate(1deg) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px hsl(var(--primary) / 0.5);
+    transform: rotate(2deg) scale(1.02);
     cursor: grabbing;
+    background: hsl(var(--background));
   }
 
   /* Funnel bar */
@@ -404,6 +372,18 @@
     border-radius: 9999px;
     background: hsl(var(--primary) / 0.7);
     transition: width 0.5s ease;
+  }
+
+  /* Inputs & Selects */
+  
+  .input-field::placeholder {
+    @apply text-muted-foreground/60;
+  }
+
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
   }
 
   /* Empty state */
@@ -431,4 +411,13 @@
     border-radius: 1rem;
     background: hsl(var(--destructive) / 0.05);
   }
+}
+
+@layer components {
+  .input-field {
+    @apply flex h-9 w-full rounded-[6px] border border-border bg-background px-3 py-1 text-[13px] text-foreground shadow-sm transition-colors;
+    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .input-field::placeholder { @apply text-muted-foreground/60; }
+  .label { @apply text-[13px] font-semibold leading-none text-foreground mb-1.5 block; }
 }

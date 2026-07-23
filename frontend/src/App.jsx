@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/shared/components/Brand";
 /**
  * App.jsx — Role-aware routing root
  *
@@ -48,8 +49,8 @@ function RootRedirect() {
 
   if (isLoading) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
+      <div className="flex flex-col h-dvh items-center justify-center bg-background">
+        <BrandLogo markSize="size-12" textSize="text-2xl" className="animate-pulse" />
       </div>
     );
   }
@@ -61,7 +62,12 @@ function RootRedirect() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <Routes>
+      <div className="relative min-h-dvh w-full bg-background font-sans text-foreground">
+        {/* Global Signature: Forge Grid Background */}
+        <div className="fixed inset-0 pointer-events-none forge-grid opacity-[0.15] mix-blend-overlay z-0" />
+        
+        <div className="relative z-10 h-full w-full">
+          <Routes>
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
 
@@ -144,7 +150,9 @@ export default function App() {
             </div>
           }
         />
-      </Routes>
+        </Routes>
+        </div>
+      </div>
     </ErrorBoundary>
   );
 }

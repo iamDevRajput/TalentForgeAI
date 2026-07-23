@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/shared/components/Brand";
 /**
  * LoginPage.jsx — Authentication entry for all roles
  *
@@ -69,11 +70,11 @@ export default function LoginPage() {
       <div className="w-full max-w-[420px] space-y-8 page-enter relative z-10">
         {/* Header */}
         <div className="text-center flex flex-col items-center">
-          <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_40px_hsl(var(--primary)/0.3)] ring-1 ring-white/10">
-            <Sparkles className="size-7 text-white" />
-          </div>
+          <Link to="/" className="mb-6 hover:opacity-80 transition-opacity">
+            <BrandLogo markSize="size-14" textSize="text-2xl" />
+          </Link>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome to <span className="gradient-text">TalentForgeAI</span>
+            Welcome back
           </h1>
           <p className="mt-2 text-[15px] text-muted-foreground">
             Sign in to your account to continue

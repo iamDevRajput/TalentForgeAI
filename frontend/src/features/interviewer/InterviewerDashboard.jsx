@@ -1,3 +1,6 @@
+import { cn } from "@/lib/utils";
+import EmptyState from "@/shared/components/EmptyState";
+import DashboardHero from "@/shared/components/DashboardHero";
 import { useState, useEffect } from 'react';
 import { Video, Calendar, Clock, MessageSquare, CheckCircle, ExternalLink } from 'lucide-react';
 import NavBar from '@/shared/components/NavBar';
@@ -130,31 +133,55 @@ export default function InterviewerDashboard() {
           <div className="mx-auto max-w-4xl space-y-8">
 
             {/* Header */}
-            <div>
-              <p className="text-[11px] font-semibold text-primary uppercase tracking-widest">Interviewer Portal</p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">My Interviews</h1>
-              <p className="text-[13px] text-muted-foreground mt-1">Review your schedule and submit candidate feedback.</p>
-            </div>
+            <DashboardHero 
+              title="Interviewer Dashboard" 
+              subtitle="Review your upcoming interviews and submit candidate feedback."
+              actionLabel="View Calendar"
+              action={() => {}} // Phase 2: Open calendar view
+            />
 
-            {/* KPI Row */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { icon: Calendar, label: 'Total', value: interviews.length, accent: 'bg-primary/10 text-primary' },
-                { icon: Clock, label: 'Upcoming', value: upcoming.length, accent: 'bg-blue-500/10 text-blue-400' },
-                { icon: CheckCircle, label: 'Completed', value: completed.length, accent: 'bg-emerald-500/10 text-emerald-400' },
-              ].map(({ icon: Icon, label, value, accent }) => (
-                <div key={label} className="kpi-card">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
-                      <p className="mt-1.5 text-2xl font-bold text-foreground">{value}</p>
-                    </div>
-                    <div className={`flex size-9 items-center justify-center rounded-lg ${accent}`}>
-                      <Icon className="size-4" />
-                    </div>
-                  </div>
+            {/* Stats Overview with Ring */}
+            <div className="premium-card rounded-[6px] p-6 flex flex-col md:flex-row items-center gap-8 border border-border">
+              {/* Ring Chart */}
+              <div className="relative size-24 shrink-0 flex items-center justify-center">
+                <svg className="size-full -rotate-90 transform" viewBox="0 0 100 100">
+                  {/* Background Track */}
+                  <circle cx="50" cy="50" r="40" className="fill-none stroke-muted/30" strokeWidth="8" />
+                  {/* Progress Ring */}
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="40" 
+                    className="fill-none stroke-primary transition-all duration-1000 ease-out" 
+                    strokeWidth="8" 
+                    strokeDasharray="251.2" 
+                    strokeDashoffset={interviews.length > 0 ? 251.2 - (251.2 * (completed.length / interviews.length)) : 251.2}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-[18px] font-bold text-foreground">
+                    {interviews.length > 0 ? Math.round((completed.length / interviews.length) * 100) : 0}%
+                  </span>
                 </div>
-              ))}
+              </div>
+              
+              {/* Stats Breakdown */}
+              <div className="flex-1 grid grid-cols-3 gap-4 w-full">
+                {[
+                  { icon: Calendar, label: 'Total', value: interviews.length, color: 'text-primary' },
+                  { icon: Clock, label: 'Upcoming', value: upcoming.length, color: 'text-muted-foreground' },
+                  { icon: CheckCircle, label: 'Completed', value: completed.length, color: 'text-foreground' },
+                ].map(({ icon: Icon, label, value, color }) => (
+                  <div key={label} className="flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Icon className={cn("size-3.5", color)} />
+                      <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {isLoading ? (
@@ -169,15 +196,11 @@ export default function InterviewerDashboard() {
                 </button>
               </div>
             ) : interviews.length === 0 ? (
-              <div className="empty-state">
-                <div className="flex size-16 items-center justify-center rounded-2xl bg-muted/60 mb-4">
-                  <Calendar className="size-8 text-muted-foreground/40" />
-                </div>
-                <h3 className="text-[16px] font-semibold text-foreground">No interviews yet</h3>
-                <p className="text-[13px] text-muted-foreground mt-2 max-w-sm">
-                  You don't have any interviews scheduled. An HR team member will assign interviews to you.
-                </p>
-              </div>
+              <EmptyState 
+                icon={Calendar}
+                title="No interviews yet"
+                description="You don't have any interviews scheduled. An HR team member will assign interviews to you."
+              />
             ) : (
               <div className="space-y-6">
                 {/* Upcoming section */}
