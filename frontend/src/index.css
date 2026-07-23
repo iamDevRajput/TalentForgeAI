@@ -226,6 +226,16 @@
       hsl(var(--background));
   }
 
+  /* Premium subtle grid overlay */
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+  }
+
   /* Page fade-in animation */
   .page-enter {
     animation: page-enter 0.2s ease-out;

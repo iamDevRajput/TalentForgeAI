@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Sparkles, Loader2, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, Loader2, Mail, Lock, User, ArrowRight, ShieldCheck, Check } from 'lucide-react';
 import { authApi } from './authApi';
 import { useAuthStore } from './authStore';
 import { useToast } from '@/shared/components/Toast';
@@ -44,8 +44,11 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(registerSchema) });
+
+  const passwordValue = watch('password', '');
 
   const onSubmit = async ({ name, email, password }) => {
     try {
@@ -64,24 +67,49 @@ export default function RegisterPage() {
     }
   };
 
+  // Password strength calculation
+  const calculateStrength = (pass) => {
+    if (!pass) return 0;
+    let score = 0;
+    if (pass.length >= 8) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[a-z]/.test(pass)) score += 1;
+    if (/\d/.test(pass)) score += 1;
+    if (/[^a-zA-Z\d]/.test(pass)) score += 1;
+    return Math.min(score, 4);
+  };
+
+  const getStrengthColor = (score) => {
+    if (score === 0) return 'bg-muted';
+    if (score <= 1) return 'bg-destructive';
+    if (score === 2) return 'bg-warning';
+    if (score === 3) return 'bg-primary';
+    return 'bg-success';
+  };
+
+  const strengthScore = calculateStrength(passwordValue);
+
   return (
-    <div className="gradient-bg flex min-h-dvh flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-8 page-enter">
+    <div className="gradient-bg flex min-h-dvh flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Grid Background Overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-60 mix-blend-overlay pointer-events-none" />
+
+      <div className="w-full max-w-[420px] space-y-8 page-enter relative z-10">
         {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-            <Sparkles className="size-6 text-primary-foreground" />
+        <div className="text-center flex flex-col items-center">
+          <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_40px_hsl(var(--primary)/0.3)] ring-1 ring-white/10">
+            <Sparkles className="size-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Join <span className="gradient-text">TalentForgeAI</span>
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Create your candidate account to start applying
           </p>
         </div>
 
         {/* Card */}
-        <div className="glass-card rounded-2xl p-8">
+        <div className="rounded-2xl border border-white/5 bg-card/60 p-8 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
           <form
             id="register-form"
             onSubmit={handleSubmit(onSubmit)}
@@ -89,85 +117,106 @@ export default function RegisterPage() {
             noValidate
           >
             {/* Name */}
-            <div className="space-y-1.5">
-              <label htmlFor="register-name" className="block text-sm font-medium text-foreground">
+            <div className="space-y-2">
+              <label htmlFor="register-name" className="block text-[13px] font-semibold text-foreground/90">
                 Full name
               </label>
-              <input
-                id="register-name"
-                type="text"
-                autoComplete="name"
-                placeholder="Jane Smith"
-                {...register('name')}
-                className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="register-name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Jane Smith"
+                  {...register('name')}
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-4 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
+                />
+              </div>
               {errors.name && (
-                <p className="text-xs text-destructive">{errors.name.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5"><ShieldCheck className="size-3" />{errors.name.message}</p>
               )}
             </div>
 
             {/* Email */}
-            <div className="space-y-1.5">
-              <label htmlFor="register-email" className="block text-sm font-medium text-foreground">
+            <div className="space-y-2">
+              <label htmlFor="register-email" className="block text-[13px] font-semibold text-foreground/90">
                 Email address
               </label>
-              <input
-                id="register-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                {...register('email')}
-                className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="register-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  {...register('email')}
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-4 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
+                />
+              </div>
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5"><ShieldCheck className="size-3" />{errors.email.message}</p>
               )}
             </div>
 
             {/* Password */}
-            <div className="space-y-1.5">
-              <label htmlFor="register-password" className="block text-sm font-medium text-foreground">
+            <div className="space-y-2">
+              <label htmlFor="register-password" className="block text-[13px] font-semibold text-foreground/90">
                 Password
               </label>
               <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   id="register-password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   placeholder="Min. 8 characters"
                   {...register('password')}
-                  className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-10 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
                 />
                 <button
                   type="button"
                   id="register-toggle-password"
                   onClick={() => setShowPassword((s) => !s)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              
+              {/* Password Strength Indicator */}
+              <div className="mt-3 flex gap-1.5">
+                {[1, 2, 3, 4].map((level) => (
+                  <div 
+                    key={level} 
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${strengthScore >= level ? getStrengthColor(strengthScore) : 'bg-secondary'}`}
+                  />
+                ))}
+              </div>
+
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5 mt-1.5"><ShieldCheck className="size-3" />{errors.password.message}</p>
               )}
             </div>
 
             {/* Confirm Password */}
-            <div className="space-y-1.5">
-              <label htmlFor="register-confirm-password" className="block text-sm font-medium text-foreground">
+            <div className="space-y-2">
+              <label htmlFor="register-confirm-password" className="block text-[13px] font-semibold text-foreground/90">
                 Confirm password
               </label>
-              <input
-                id="register-confirm-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                placeholder="Re-enter password"
-                {...register('confirmPassword')}
-                className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
+              <div className="relative">
+                <ShieldCheck className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="register-confirm-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  placeholder="Re-enter password"
+                  {...register('confirmPassword')}
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-4 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
+                />
+              </div>
               {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5"><ShieldCheck className="size-3" />{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -176,7 +225,7 @@ export default function RegisterPage() {
               id="register-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-primary to-primary/90 px-4 py-3 text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:scale-[1.01] hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] active:scale-95 disabled:pointer-events-none disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -185,8 +234,8 @@ export default function RegisterPage() {
                 </>
               ) : (
                 <>
-                  <UserPlus className="size-4" />
                   Create account
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                 </>
               )}
             </button>
@@ -194,12 +243,12 @@ export default function RegisterPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-[14px] text-muted-foreground relative z-10">
           Already have an account?{' '}
           <Link
             to="/auth/login"
             id="register-login-link"
-            className="font-medium text-primary transition-opacity hover:opacity-80"
+            className="font-semibold text-primary transition-all hover:text-primary/80 hover:underline hover:underline-offset-4"
           >
             Sign in
           </Link>

@@ -13,7 +13,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, Loader2, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { authApi } from './authApi';
 import { useAuthStore } from './authStore';
 import { useToast } from '@/shared/components/Toast';
@@ -62,23 +62,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="gradient-bg flex min-h-dvh flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-8 page-enter">
+    <div className="gradient-bg flex min-h-dvh flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Grid Background Overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-60 mix-blend-overlay pointer-events-none" />
+
+      <div className="w-full max-w-[420px] space-y-8 page-enter relative z-10">
         {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-            <Sparkles className="size-6 text-primary-foreground" />
+        <div className="text-center flex flex-col items-center">
+          <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_40px_hsl(var(--primary)/0.3)] ring-1 ring-white/10">
+            <Sparkles className="size-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Welcome to <span className="gradient-text">TalentForgeAI</span>
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Sign in to your account to continue
           </p>
         </div>
 
         {/* Card */}
-        <div className="glass-card rounded-2xl p-8">
+        <div className="rounded-2xl border border-white/5 bg-card/60 p-8 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
           <form
             id="login-form"
             onSubmit={handleSubmit(onSubmit)}
@@ -86,55 +89,61 @@ export default function LoginPage() {
             noValidate
           >
             {/* Email */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label
                 htmlFor="login-email"
-                className="block text-sm font-medium text-foreground"
+                className="block text-[13px] font-semibold text-foreground/90"
               >
                 Email address
               </label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@company.com"
-                {...register('email')}
-                className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="login-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  {...register('email')}
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-4 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
+                />
+              </div>
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5"><ShieldCheck className="size-3" />{errors.email.message}</p>
               )}
             </div>
 
             {/* Password */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="login-password"
-                className="block text-sm font-medium text-foreground"
-              >
-                Password
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="login-password"
+                  className="block text-[13px] font-semibold text-foreground/90"
+                >
+                  Password
+                </label>
+              </div>
               <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
                   {...register('password')}
-                  className="w-full rounded-lg border border-input bg-secondary/40 px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:bg-secondary/60 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-10 py-2.5 text-[15px] text-foreground placeholder:text-muted-foreground/50 transition-all hover:bg-background/80 focus:border-primary focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10"
                 />
                 <button
                   type="button"
                   id="login-toggle-password"
                   onClick={() => setShowPassword((s) => !s)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password.message}</p>
+                <p className="text-xs text-destructive flex items-center gap-1.5"><ShieldCheck className="size-3" />{errors.password.message}</p>
               )}
             </div>
 
@@ -143,7 +152,7 @@ export default function LoginPage() {
               id="login-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-primary to-primary/90 px-4 py-3 text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:scale-[1.01] hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] active:scale-95 disabled:pointer-events-none disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -151,19 +160,22 @@ export default function LoginPage() {
                   Signing in...
                 </>
               ) : (
-                'Sign in'
+                <>
+                  Sign in
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </>
               )}
             </button>
           </form>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-[14px] text-muted-foreground relative z-10">
           New candidate?{' '}
           <Link
             to="/auth/register"
             id="login-register-link"
-            className="font-medium text-primary transition-opacity hover:opacity-80"
+            className="font-semibold text-primary transition-all hover:text-primary/80 hover:underline hover:underline-offset-4"
           >
             Create an account
           </Link>
