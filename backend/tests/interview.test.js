@@ -78,8 +78,14 @@ describe('Phase 5: Interview Module', () => {
     testApp = await Application.create({
       jobId: testJob._id,
       candidateId: candidateUser._id,
-      resumeUrl: 'https://cloudinary.com/test-resume.pdf',
-      status: 'screening'
+      status: 'screening',
+      resume: {
+        url: 'https://cloudinary.com/test-resume.pdf',
+        originalFilename: 'test-resume.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 1024,
+        uploadedAt: new Date()
+      },
     });
   });
 

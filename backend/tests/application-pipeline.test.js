@@ -19,6 +19,7 @@ const { default: app } = await import('../src/app.js');
 const { default: User } = await import('../src/models/User.js');
 const { default: Job } = await import('../src/models/Job.js');
 const { default: Application } = await import('../src/models/Application.js');
+const { default: AuditLog } = await import('../src/models/AuditLog.js');
 
 let mongoServer;
 
@@ -78,13 +79,14 @@ describe('Phase 4: Application Pipeline & State Machine', () => {
     testApp = await Application.create({
       jobId: testJob._id,
       candidateId: candidateUser._id,
-      resumeUrl: 'https://cloudinary.com/dummy.pdf',
       status: 'applied',
-      timeline: [{
-        status: 'applied',
-        changedBy: candidateUser._id,
-        notes: 'Application submitted',
-      }]
+      resume: {
+        url: 'https://cloudinary.com/dummy.pdf',
+        originalFilename: 'dummy.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 1024,
+        uploadedAt: new Date()
+      }
     });
   });
 
@@ -100,11 +102,14 @@ describe('Phase 4: Application Pipeline & State Machine', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.application.status).toBe('screening');
       
-      const timeline = res.body.data.application.timeline;
-      expect(timeline.length).toBe(2);
-      expect(timeline[1].status).toBe('screening');
-      expect(timeline[1].notes).toBe('Looks good');
-      expect(timeline[1].changedBy).toBe(hrUser._id.toString());
+      const audit = await AuditLog.findOne({
+        entityId: testApp._id,
+        action: 'UPDATE_APPLICATION_STAGE'
+      }).sort({ createdAt: -1 });
+
+      expect(audit).toBeDefined();
+      expect(audit.metadata.to).toBe('screening');
+      expect(audit.actorId.toString()).toBe(hrUser._id.toString());
     });
 
     it('should reject unauthorized stage movement (candidate token)', async () => {

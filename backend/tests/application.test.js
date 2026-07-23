@@ -149,9 +149,9 @@ describe('Application Module', () => {
         .attach('resume', pdfBuffer, { filename: 'resume.pdf', contentType: 'application/pdf' });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.application.resumeUrl).toBe('https://cloudinary.com/resume.pdf');
+      expect(res.body.data.application.resume.url).toBe('https://cloudinary.com/resume.pdf');
       
-      const auditLog = await AuditLog.findOne({ action: 'SUBMIT_APPLICATION' });
+      const auditLog = await AuditLog.findOne({ action: 'UPDATE_APPLICATION_STAGE' });
       expect(auditLog).toBeTruthy();
     });
 

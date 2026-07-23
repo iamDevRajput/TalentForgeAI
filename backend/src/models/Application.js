@@ -14,35 +14,19 @@ const applicationSchema = new mongoose.Schema(
       required: [true, 'Candidate ID is required'],
       index: true,
     },
-    resumeUrl: {
-      type: String,
-      required: [true, 'Resume URL is required'],
+    resume: {
+      url: { type: String, required: true },
+      originalFilename: { type: String, required: true },
+      mimeType: { type: String, required: true },
+      sizeBytes: { type: Number, required: true },
+      uploadedAt: { type: Date, required: true }
     },
     status: {
       type: String,
       enum: ['applied', 'screening', 'interviewing', 'offered', 'hired', 'rejected'],
       default: 'applied',
     },
-    timeline: [
-      {
-        status: {
-          type: String,
-          required: true,
-        },
-        changedBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-          required: true,
-        },
-        changedAt: {
-          type: Date,
-          default: Date.now,
-        },
-        notes: {
-          type: String,
-        },
-      },
-    ],
+
   },
   { timestamps: true }
 );

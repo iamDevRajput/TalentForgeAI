@@ -7,13 +7,17 @@ export const submitApplication = asyncHandler(async (req, res) => {
   const callerRole = req.user.role;
   const fileBuffer = req.file.buffer;
   const originalName = req.file.originalname;
+  const mimeType = req.file.mimetype;
+  const sizeBytes = req.file.size;
 
   const application = await applicationService.createApplication(
     jobId,
     candidateId,
     callerRole,
     fileBuffer,
-    originalName
+    originalName,
+    mimeType,
+    sizeBytes
   );
 
   res.status(201).json({

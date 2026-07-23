@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Calendar } from 'lucide-react';
@@ -17,13 +17,10 @@ export default function JobPipeline() {
   const [error, setError] = useState(null);
   const [schedulingApp, setSchedulingApp] = useState(null);
 
-  useEffect(() => {
-    fetchApplications();
-  }, [jobId]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const res = await fetch(`/api/applications/job/${jobId}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.message || 'Failed to fetch applications');
@@ -33,7 +30,11 @@ export default function JobPipeline() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [jobId]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -192,7 +193,7 @@ export default function JobPipeline() {
         isOpen={!!schedulingApp}
         application={schedulingApp}
         onClose={() => setSchedulingApp(null)}
-        onScheduled={(interview) => {
+        onScheduled={(_interview) => {
           // If the application was successfully scheduled, its stage likely changed to 'interviewing'
           // We refetch to keep timeline and status perfectly in sync with backend
           fetchApplications();

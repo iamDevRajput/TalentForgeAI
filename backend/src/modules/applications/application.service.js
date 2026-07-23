@@ -1,12 +1,13 @@
 import Application from '../../models/Application.js';
 import Job from '../../models/Job.js';
+import AuditLog from '../../models/AuditLog.js';
 import { AppError } from '../../utils/AppError.js';
 import { uploadResumeToCloudinary } from '../uploads/upload.service.js';
 
 /**
  * Creates an application (Candidate only)
  */
-export const createApplication = async (jobId, candidateId, callerRole, fileBuffer, originalName) => {
+export const createApplication = async (jobId, candidateId, callerRole, fileBuffer, originalName, mimeType, sizeBytes) => {
   if (callerRole !== 'candidate') {
     throw new AppError("Role 'hr' is not permitted to access this resource", 403);
   }
@@ -25,13 +26,26 @@ export const createApplication = async (jobId, candidateId, callerRole, fileBuff
     const application = await Application.create({
       jobId,
       candidateId,
-      resumeUrl: uploadResult.secure_url,
+      resume: {
+        url: uploadResult.secure_url,
+        originalFilename: originalName,
+        mimeType: mimeType || 'application/pdf',
+        sizeBytes: sizeBytes || uploadResult.bytes || fileBuffer.length,
+        uploadedAt: uploadResult.created_at || new Date()
+      },
       status: 'applied',
-      timeline: [{
-        status: 'applied',
-        changedBy: candidateId,
-        notes: 'Application submitted',
-      }]
+    });
+
+    await AuditLog.create({
+      actorId: candidateId,
+      action: 'UPDATE_APPLICATION_STAGE',
+      entityType: 'application',
+      entityId: application._id,
+      metadata: {
+        from: null,
+        to: 'applied',
+        notes: 'Application submitted'
+      }
     });
 
     return application;
@@ -111,13 +125,20 @@ export const updateApplicationStage = async (applicationId, callerId, callerRole
   }
 
   application.status = newStatus;
-  application.timeline.push({
-    status: newStatus,
-    changedBy: callerId,
-    notes: notes || `Moved to ${newStatus}`,
-  });
-
+  
   await application.save();
+
+  await AuditLog.create({
+    actorId: callerId,
+    action: 'UPDATE_APPLICATION_STAGE',
+    entityType: 'application',
+    entityId: application._id,
+    metadata: {
+      from: currentStatus,
+      to: newStatus,
+      notes: notes || `Moved to ${newStatus}`
+    }
+  });
 
   return application;
 };
