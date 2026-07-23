@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Sparkles, Loader2, Mail, Lock, User, ArrowRight, ShieldCheck, Check } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, Loader2, Mail, Lock, User, ArrowRight, ShieldCheck } from 'lucide-react';
 import { authApi } from './authApi';
 import { useAuthStore } from './authStore';
 import { useToast } from '@/shared/components/Toast';

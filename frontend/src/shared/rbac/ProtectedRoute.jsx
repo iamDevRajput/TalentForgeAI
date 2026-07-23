@@ -4,7 +4,7 @@
  * Behaviour:
  *   - While auth is loading (rehydrating from localStorage): show spinner
  *   - Not authenticated: redirect to /auth/login
- *   - Authenticated but wrong role: redirect to the correct role's dashboard
+ *   - Authenticated but wrong role: show branded 403 Unauthorized page
  *   - Authenticated + correct role: render children
  *
  * Usage:
@@ -16,12 +16,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/authStore';
 import LoadingSpinner from '@/shared/components/LoadingSpinner';
-
-const ROLE_DEFAULT_PATHS = {
-  hr: '/hr/dashboard',
-  interviewer: '/interviewer/dashboard',
-  candidate: '/candidate/dashboard',
-};
+import UnauthorizedPage from '@/shared/components/UnauthorizedPage';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { user, isLoading } = useAuthStore();
@@ -42,10 +37,9 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  // Authenticated but wrong role — redirect to correct dashboard
+  // Authenticated but wrong role — show branded 403 page
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    const defaultPath = ROLE_DEFAULT_PATHS[user.role] || '/auth/login';
-    return <Navigate to={defaultPath} replace />;
+    return <UnauthorizedPage />;
   }
 
   return children;

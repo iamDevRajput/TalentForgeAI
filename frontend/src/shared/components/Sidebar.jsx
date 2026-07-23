@@ -1,9 +1,6 @@
 /**
  * Sidebar.jsx — Collapsible sidebar for HR and Interviewer dashboards
  *
- * Phase 1: Shows navigation shell with placeholder links.
- * Phase 2+: Each module adds its own nav item to the relevant role's sidebar config.
- *
  * Collapsed state persists to localStorage.
  */
 
@@ -24,50 +21,44 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/authStore';
 
 const HR_NAV = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/hr/dashboard', phase: 1 },
-  { label: 'Jobs', icon: Briefcase, path: '/hr/jobs', phase: 2 },
-  { label: 'Candidates', icon: Users, path: '/hr/candidates', phase: 3 },
-  { label: 'Pipeline', icon: ClipboardList, path: '/hr/pipeline', phase: 5 },
-  { label: 'Interviews', icon: Calendar, path: '/hr/interviews', phase: 7 },
-  { label: 'Analytics', icon: BarChart3, path: '/hr/analytics', phase: 11 },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/hr/dashboard' },
+  { label: 'Jobs', icon: Briefcase, path: '/hr/jobs' },
+  { label: 'Candidates', icon: Users, path: '/hr/candidates' },
+  { label: 'Pipeline', icon: ClipboardList, path: '/hr/pipeline' },
+  { label: 'Interviews', icon: Calendar, path: '/hr/interviews' },
+  { label: 'Analytics', icon: BarChart3, path: '/hr/analytics' },
 ];
 
 const INTERVIEWER_NAV = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/interviewer/dashboard', phase: 1 },
-  { label: 'My Interviews', icon: Calendar, path: '/interviewer/interviews', phase: 8 },
-  { label: 'Feedback', icon: MessageSquare, path: '/interviewer/feedback', phase: 9 },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/interviewer/dashboard' },
+  { label: 'My Interviews', icon: Calendar, path: '/interviewer/interviews' },
+  { label: 'Feedback', icon: MessageSquare, path: '/interviewer/feedback' },
 ];
 
 const NAV_BY_ROLE = { hr: HR_NAV, interviewer: INTERVIEWER_NAV };
 
 function NavItem({ item, collapsed }) {
   const { pathname } = useLocation();
-  const isActive = pathname === item.path;
+  const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
 
   return (
     <Link
       to={item.path}
       aria-label={item.label}
+      title={collapsed ? item.label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
+        'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
         isActive
-          ? 'bg-primary/15 text-primary shadow-sm'
-          : 'text-sidebar-muted hover:bg-secondary/60 hover:text-foreground',
+          ? 'bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20'
+          : 'text-sidebar-muted hover:bg-secondary/50 hover:text-foreground',
         collapsed && 'justify-center px-2',
       )}
     >
       <item.icon
-        className={cn('size-4 shrink-0 transition-colors', isActive ? 'text-primary' : '')}
+        className={cn('size-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'group-hover:text-foreground')}
       />
-      {!collapsed && (
-        <span className="truncate">{item.label}</span>
-      )}
-      {!collapsed && item.phase > 1 && (
-        <span className="ml-auto rounded text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono">
-          Ph{item.phase}
-        </span>
-      )}
+      {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );
 }
@@ -92,7 +83,7 @@ export default function Sidebar() {
       )}
     >
       {/* Nav items */}
-      <nav className="flex-1 space-y-1 p-2 pt-4">
+      <nav className="flex-1 space-y-0.5 p-2 pt-4">
         {navItems.map((item) => (
           <NavItem key={item.path} item={item} collapsed={collapsed} />
         ))}
@@ -105,8 +96,8 @@ export default function Sidebar() {
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={cn(
-            'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground',
-            'transition-colors hover:bg-secondary/60 hover:text-foreground',
+            'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-muted-foreground',
+            'transition-colors hover:bg-secondary/50 hover:text-foreground',
             collapsed && 'justify-center px-2',
           )}
         >

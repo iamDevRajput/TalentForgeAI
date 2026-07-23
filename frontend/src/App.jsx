@@ -18,6 +18,7 @@
  */
 
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/authStore';
 import ProtectedRoute from '@/shared/rbac/ProtectedRoute';
 import ErrorBoundary from '@/shared/components/ErrorBoundary';
@@ -113,18 +114,33 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-background text-center">
-              <p className="text-6xl font-bold text-muted-foreground/20">404</p>
-              <h2 className="text-xl font-semibold text-foreground">Page not found</h2>
-              <p className="text-sm text-muted-foreground">
-                The page you're looking for doesn't exist or you don't have access.
-              </p>
-              <a
-                href="/"
-                className="mt-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Go home
-              </a>
+            <div className="gradient-bg relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4">
+              <div className="absolute inset-0 bg-grid-pattern opacity-50 mix-blend-overlay pointer-events-none" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-8 max-w-md">
+                {/* Brand */}
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_24px_hsl(var(--primary)/0.35)] ring-1 ring-white/10">
+                    <Sparkles className="size-5 text-white" />
+                  </div>
+                  <span className="text-[15px] font-bold text-foreground tracking-tight">
+                    TalentForge<span className="gradient-text">AI</span>
+                  </span>
+                </div>
+                {/* 404 number */}
+                <div>
+                  <p className="text-[120px] font-black leading-none tracking-tight text-foreground/5 select-none">404</p>
+                  <h1 className="-mt-6 text-2xl font-bold tracking-tight text-foreground">Page Not Found</h1>
+                  <p className="mt-3 text-[15px] text-muted-foreground max-w-xs mx-auto">
+                    The page you're looking for doesn't exist or has been moved.
+                  </p>
+                </div>
+                <a
+                  href="/"
+                  className="group flex items-center gap-2 rounded-xl bg-gradient-to-b from-primary to-primary/90 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] active:scale-95"
+                >
+                  Go Home
+                </a>
+              </div>
             </div>
           }
         />
