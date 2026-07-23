@@ -416,7 +416,7 @@
 @layer components {
   .input-field {
     @apply flex h-9 w-full rounded-[6px] border border-border bg-background px-3 py-1 text-[13px] text-foreground shadow-sm transition-colors;
-    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50;
+    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50;
   }
   .input-field::placeholder { @apply text-muted-foreground/60; }
   .label { @apply text-[13px] font-semibold leading-none text-foreground mb-1.5 block; }

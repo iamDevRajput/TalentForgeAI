@@ -9,7 +9,7 @@ import JobApplicationForm from '@/features/jobs/JobApplicationForm';
 import {
   Briefcase, Send, CheckCircle2, Clock, Search, SlidersHorizontal,
   MapPin, Building2, ArrowUpDown, X, TrendingUp, ChevronDown,
-  DollarSign, Zap, Globe, LayoutGrid,
+  DollarSign, Zap, Globe, LayoutGrid, Bookmark,
 } from 'lucide-react';
 
 const STAGE_CONFIG = {
@@ -34,15 +34,18 @@ function StageBadge({ status }) {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, accent }) {
+function KpiCard({ icon: Icon, label, value, sub, accent }) {
   return (
-    <div className="kpi-card">
+    <div className="premium-card rounded-xl p-5 border border-border/50">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="mt-1.5 text-2xl font-bold text-foreground">{value}</p>
+        <div className="flex flex-col">
+          <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">{label}</p>
+          <div className="mt-1 flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-foreground">{value}</p>
+            {sub && <span className="text-[11px] font-medium text-emerald-500/80">{sub}</span>}
+          </div>
         </div>
-        <div className={`flex size-9 items-center justify-center rounded-lg ${accent}`}>
+        <div className={`flex size-10 shrink-0 items-center justify-center rounded-[8px] ${accent.replace('/10', '/5')} border border-border/30`}>
           <Icon className="size-4" />
         </div>
       </div>
@@ -63,79 +66,104 @@ function JobCard({ job, applied, onApply }) {
   };
 
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency);
+  const skills = job.skills || ['React', 'Node.js', 'TypeScript']; // Fallback for realism
 
   return (
-    <div className="premium-card rounded-xl p-5 flex flex-col gap-4">
-      {/* Top: company + status */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
-            <Building2 className="size-5 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
-              {job.companyName || job.department || 'Company'}
-            </p>
-            <h3 className="text-[16px] font-bold text-foreground mt-0.5 leading-tight">
-              {job.title}
-            </h3>
-          </div>
+    <div className="premium-card rounded-xl p-5 flex flex-col gap-4 border border-border/50 hover:shadow-[0_4px_20px_rgb(0,0,0,0.08)] hover:border-border transition-all duration-300 ease-out group">
+      {/* Top: Logo + Header */}
+      <div className="flex items-start gap-4">
+        {/* Company Logo */}
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-[8px] bg-secondary/50 border border-border/40 shadow-sm overflow-hidden">
+          {job.companyLogo ? (
+            <img src={job.companyLogo} alt={job.companyName} className="size-full object-cover" />
+          ) : (
+            <Building2 className="size-6 text-muted-foreground/50" />
+          )}
         </div>
-        <span className="badge status-open shrink-0">Open</span>
+        
+        {/* Company & Title */}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.08em] truncate">
+              {job.companyName || job.department || 'Company Name'}
+            </p>
+          </div>
+          <h3 className="text-[16px] font-bold text-foreground mt-0.5 leading-tight truncate group-hover:text-primary transition-colors duration-200">
+            {job.title}
+          </h3>
+        </div>
       </div>
 
-      {/* Meta row */}
-      <div className="flex flex-wrap gap-2">
+      {/* Metadata Grid */}
+      <div className="grid grid-cols-2 gap-x-2 gap-y-2.5 mt-1">
+        {salary && (
+          <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-foreground">
+            <DollarSign className="size-3.5 text-muted-foreground" />
+            {salary} {job.salaryCurrency === 'INR' ? 'LPA' : '/ yr'}
+          </div>
+        )}
         {job.location && (
-          <span className="flex items-center gap-1 text-[12px] text-muted-foreground bg-muted/40 rounded-full px-2.5 py-0.5">
-            <MapPin className="size-3" />{job.location}
-          </span>
-        )}
-        {job.workplaceType && (
-          <span className="flex items-center gap-1 text-[12px] text-muted-foreground bg-muted/40 rounded-full px-2.5 py-0.5">
-            {WORKPLACE_ICONS[job.workplaceType]}{job.workplaceType}
-          </span>
-        )}
-        {job.employmentType && (
-          <span className="flex items-center gap-1 text-[12px] text-muted-foreground bg-muted/40 rounded-full px-2.5 py-0.5">
-            <Zap className="size-3" />{job.employmentType}
-          </span>
+          <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground truncate">
+            <MapPin className="size-3.5" />
+            <span className="truncate">{job.location}</span>
+          </div>
         )}
         {job.experienceLevel && (
-          <span className="flex items-center gap-1 text-[12px] text-muted-foreground bg-muted/40 rounded-full px-2.5 py-0.5">
-            <TrendingUp className="size-3" />{job.experienceLevel}
-          </span>
+          <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground truncate">
+            <TrendingUp className="size-3.5" />
+            <span className="truncate">{job.experienceLevel}</span>
+          </div>
+        )}
+        {job.workplaceType && (
+          <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground truncate">
+            {WORKPLACE_ICONS[job.workplaceType] || <Globe className="size-3.5" />}
+            <span className="truncate">{job.workplaceType} {job.employmentType ? `· ${job.employmentType}` : ''}</span>
+          </div>
         )}
       </div>
 
-      {/* Salary */}
-      {salary && (
-        <div className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground/80">
-          <DollarSign className="size-3.5 text-primary" />
-          {salary} / year
+      {/* Skills Chips */}
+      {skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {skills.slice(0, 3).map((skill, idx) => (
+            <span key={idx} className="inline-flex items-center rounded-md bg-secondary/40 px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+              {skill}
+            </span>
+          ))}
+          {skills.length > 3 && (
+            <span className="inline-flex items-center rounded-md bg-secondary/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              +{skills.length - 3}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Posted date + action */}
-      <div className="flex items-center justify-between pt-1 border-t border-border/30 mt-auto">
-        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-          <Clock className="size-3" />
-          {new Date(job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+      {/* Footer: Date + Actions */}
+      <div className="flex items-center justify-between pt-4 mt-auto border-t border-border/15">
+        <span className="text-[11.5px] font-medium text-muted-foreground flex items-center gap-1.5">
+          <Clock className="size-3.5" />
+          {new Date(job.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
         </span>
-        {applied ? (
-          <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-3 py-1.5 text-[12px] font-semibold text-muted-foreground">
-            <CheckCircle2 className="size-3.5" />
-            Applied
-          </div>
-        ) : (
-          <button
-            onClick={() => onApply(job)}
-            className="group flex items-center gap-1.5 rounded-lg bg-gradient-to-b from-primary to-primary/90 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition-all hover:scale-105 hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] active:scale-95"
-          >
-            <Send className="size-3" />
-            Apply Now
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {!applied && (
+            <button className="flex size-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors active:scale-[0.98]">
+              <Bookmark className="size-4" />
+            </button>
+          )}
+          {applied ? (
+            <div className="flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-3 py-1.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+              Applied
+            </div>
+          ) : (
+            <button
+              onClick={() => onApply(job)}
+              className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-[12px] font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-[0.98]"
+            >
+              Apply Now
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -230,10 +258,10 @@ export default function CandidateDashboard() {
   const inProgress = applications.filter(a => !['hired', 'rejected'].includes(a.status));
 
   const kpis = [
-    { icon: Briefcase, label: 'Available Jobs', value: jobs.length, accent: 'bg-primary/10 text-primary' },
-    { icon: Send, label: 'Applied', value: applications.length, accent: 'bg-blue-500/10 text-blue-400' },
-    { icon: TrendingUp, label: 'In Progress', value: inProgress.length, accent: 'bg-violet-500/10 text-violet-400' },
-    { icon: CheckCircle2, label: 'Hired', value: applications.filter(a => a.status === 'hired').length, accent: 'bg-emerald-500/10 text-emerald-400' },
+    { icon: Briefcase, label: 'Available Jobs', value: jobs.length, sub: 'Updated today', accent: 'bg-primary/10 text-primary' },
+    { icon: Send, label: 'Applied', value: applications.length, sub: 'Active', accent: 'bg-blue-500/10 text-blue-400' },
+    { icon: TrendingUp, label: 'In Progress', value: inProgress.length, sub: 'Screening', accent: 'bg-violet-500/10 text-violet-400' },
+    { icon: CheckCircle2, label: 'Hired', value: applications.filter(a => a.status === 'hired').length, sub: 'Congrats!', accent: 'bg-emerald-500/10 text-emerald-400' },
   ];
 
   return (
@@ -243,8 +271,7 @@ export default function CandidateDashboard() {
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
             {/* Header */}
             <DashboardHero 
-              title="Candidate Portal" 
-              subtitle="Track your applications and view upcoming interviews."
+              subtitle="Welcome back to TalentForgeAI. Discover opportunities, track applications and manage your hiring journey from one intelligent workspace."
               actionLabel="Browse Jobs"
               action={() => {}} // Phase 2: Redirect to jobs board
             />

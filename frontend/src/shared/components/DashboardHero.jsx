@@ -41,7 +41,7 @@ export default function DashboardHero({ title, subtitle, action, actionLabel }) 
           
           {/* Main Greeting */}
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            {title || `${getGreeting()}, ${user?.name?.split(' ')[0] || 'User'}`}
+            {title || `${getGreeting()}, ${user?.name?.split(' ')[0] || 'User'} 👋`}
           </h1>
           
           {/* Subtitle / Tagline */}
