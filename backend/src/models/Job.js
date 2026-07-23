@@ -24,6 +24,46 @@ const jobSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+    companyName: {
+      type: String,
+      trim: true,
+    },
+    companyLogo: {
+      type: String,
+      trim: true,
+    },
+    location: {
+      type: String,
+      trim: true,
+    },
+    workplaceType: {
+      type: String,
+      enum: ['Remote', 'Hybrid', 'Onsite'],
+    },
+    employmentType: {
+      type: String,
+      enum: ['Full-time', 'Part-time', 'Internship', 'Contract'],
+    },
+    salaryMin: {
+      type: Number,
+      min: 0,
+    },
+    salaryMax: {
+      type: Number,
+      min: 0,
+    },
+    salaryCurrency: {
+      type: String,
+      default: 'INR',
+      trim: true,
+    },
+    experienceLevel: {
+      type: String,
+      enum: ['Entry', 'Mid', 'Senior'],
+    },
+    applicationDeadline: {
+      type: Date,
+    },
     status: {
       type: String,
       enum: ['draft', 'open', 'closed'],
@@ -40,6 +80,21 @@ const jobSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+/**
+ * Schema-level validation for salary range.
+ * WHY: This guarantees data integrity at the lowest level. Relying solely on UI
+ * or controller validation allows bad data to slip in through scripts or bugs.
+ * If both min and max are provided, max must be logically greater or equal to min.
+ */
+jobSchema.pre('validate', function (next) {
+  if (this.salaryMin != null && this.salaryMax != null) {
+    if (this.salaryMax < this.salaryMin) {
+      this.invalidate('salaryMax', 'salaryMax must be greater than or equal to salaryMin');
+    }
+  }
+  next();
+});
 
 /**
  * WHY: Candidates will primarily query the platform to list available jobs. 

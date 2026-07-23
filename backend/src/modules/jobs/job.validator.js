@@ -31,6 +31,16 @@ export const createJobSchema = z.object({
     )
     .optional()
     .default([]),
+  companyName: z.string().trim().optional(),
+  companyLogo: z.string().url().optional().or(z.literal('')),
+  location: z.string().trim().optional(),
+  workplaceType: z.enum(['Remote', 'Hybrid', 'Onsite']).optional(),
+  employmentType: z.enum(['Full-time', 'Part-time', 'Internship', 'Contract']).optional(),
+  salaryMin: z.number().min(0).optional(),
+  salaryMax: z.number().min(0).optional(),
+  salaryCurrency: z.string().trim().optional(),
+  experienceLevel: z.enum(['Entry', 'Mid', 'Senior']).optional(),
+  applicationDeadline: z.string().datetime().optional(),
 });
 
 export const updateJobStatusSchema = z.object({

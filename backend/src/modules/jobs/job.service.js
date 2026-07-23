@@ -156,7 +156,12 @@ export const updateJob = async (jobId, updates, callerRole) => {
   }
 
   // Use allowlist pattern for forward-safety
-  const EDITABLE_FIELDS = ['title', 'department', 'description', 'requirements'];
+  const EDITABLE_FIELDS = [
+    'title', 'department', 'description', 'requirements',
+    'companyName', 'companyLogo', 'location', 'workplaceType',
+    'employmentType', 'salaryMin', 'salaryMax', 'salaryCurrency',
+    'experienceLevel', 'applicationDeadline'
+  ];
   for (const field of EDITABLE_FIELDS) {
     if (updates[field] !== undefined) {
       job[field] = updates[field];

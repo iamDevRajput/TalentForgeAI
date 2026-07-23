@@ -116,6 +116,46 @@ describe('Job Management Module', () => {
       expect(res.status).toBe(403);
     });
 
+    it('should successfully create a job WITHOUT any of the new optional fields', async () => {
+      const res = await request(app)
+        .post('/api/jobs')
+        .set('Authorization', `Bearer ${hrToken}`)
+        .set('Content-Type', 'application/json')
+        .send(
+          JSON.stringify({
+            title: 'Minimal Job',
+            department: 'Engineering',
+            description: 'Minimal requirements.',
+            requirements: ['Node.js'],
+          })
+        );
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.job.title).toBe('Minimal Job');
+      expect(res.body.data.job.companyName).toBeUndefined();
+    });
+
+    it('should reject a job creation if salaryMax is less than salaryMin', async () => {
+      const res = await request(app)
+        .post('/api/jobs')
+        .set('Authorization', `Bearer ${hrToken}`)
+        .set('Content-Type', 'application/json')
+        .send(
+          JSON.stringify({
+            title: 'High paying job',
+            department: 'Engineering',
+            description: 'We pay well, theoretically.',
+            requirements: [],
+            salaryMin: 100000,
+            salaryMax: 50000,
+          })
+        );
+
+      expect(res.status).toBe(422);
+      expect(res.body.error.message).toMatch(/Database validation failed/i);
+      expect(res.body.error.fields[0].message).toContain('salaryMax must be greater than or equal to salaryMin');
+    });
+
     it('should return 401 for unauthenticated create attempt', async () => {
       const res = await request(app)
         .post('/api/jobs')

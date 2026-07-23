@@ -13,6 +13,16 @@ const createJobSchema = z.object({
   department: z.string().min(1, 'Department is required'),
   description: z.string().min(1, 'Description is required'),
   requirements: z.string().optional(), // We'll parse this to an array
+  companyName: z.string().optional(),
+  companyLogo: z.string().optional(),
+  location: z.string().optional(),
+  workplaceType: z.enum(['Remote', 'Hybrid', 'Onsite']).optional(),
+  employmentType: z.enum(['Full-time', 'Part-time', 'Internship', 'Contract']).optional(),
+  salaryMin: z.preprocess((val) => (val ? Number(val) : undefined), z.number().min(0).optional()),
+  salaryMax: z.preprocess((val) => (val ? Number(val) : undefined), z.number().min(0).optional()),
+  salaryCurrency: z.string().optional(),
+  experienceLevel: z.enum(['Entry', 'Mid', 'Senior']).optional(),
+  applicationDeadline: z.string().optional(),
 });
 
 export default function CreateJobModal({ isOpen, onClose, onJobCreated }) {
@@ -42,6 +52,16 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }) {
         requirements: data.requirements
           ? data.requirements.split('\\n').map(req => req.trim()).filter(Boolean)
           : [],
+        companyName: data.companyName,
+        companyLogo: data.companyLogo,
+        location: data.location,
+        workplaceType: data.workplaceType,
+        employmentType: data.employmentType,
+        salaryMin: data.salaryMin,
+        salaryMax: data.salaryMax,
+        salaryCurrency: data.salaryCurrency,
+        experienceLevel: data.experienceLevel,
+        applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline).toISOString() : undefined,
       };
 
       const newJob = await jobApi.createJob(payload);
@@ -56,8 +76,8 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border bg-card p-6 shadow-xl relative">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 rounded-lg p-2 text-muted-foreground hover:bg-muted"
@@ -124,6 +144,69 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }) {
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm resize-none"
               placeholder="React.js\nNode.js\n5+ years experience"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Company Name</label>
+            <input {...register('companyName')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Location</label>
+            <input {...register('location')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Workplace Type</label>
+              <select {...register('workplaceType')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm">
+                <option value="">Select...</option>
+                <option value="Remote">Remote</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Onsite">Onsite</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Employment Type</label>
+              <select {...register('employmentType')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm">
+                <option value="">Select...</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Min Salary</label>
+              <input type="number" {...register('salaryMin')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Max Salary</label>
+              <input type="number" {...register('salaryMax')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Currency</label>
+              <input defaultValue="INR" {...register('salaryCurrency')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Experience Level</label>
+              <select {...register('experienceLevel')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm">
+                <option value="">Select...</option>
+                <option value="Entry">Entry</option>
+                <option value="Mid">Mid</option>
+                <option value="Senior">Senior</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Deadline</label>
+              <input type="date" {...register('applicationDeadline')} className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm" />
+            </div>
           </div>
 
           <div className="flex justify-end pt-4">
